@@ -1,0 +1,77 @@
+{
+  "date": "2026-11-05",
+  "reviewer": "Codex; selección documental sobre títulos y resúmenes disponibles",
+  "snapshot_manifest_sha256": "b7b4676147796710ba4f89d68e5d28b9936ceb46ccb437d273bea9a6fe4f497f",
+  "fetch_config_sha256": "e4047837851fa562eb90740cd2391b2763e74befe76823623b4bda989704c9e1",
+  "corpus": {
+    "snapshot_id": "openalex_20261105_s12",
+    "snapshot_sha256": "d788feb807b1cd7c9c783ab28b4ed73d0442c13cfb8ee96fcfb903508f4c3b77",
+    "raw_records": 305,
+    "normalized_unique": 305,
+    "merged_records": 0,
+    "quarantine": [],
+    "warnings": [],
+    "review_csv_sha256": "18c25bcc4521405daaed3fe3801b20531c111007ac03817b4d375b30a2e92e7d",
+    "review_rows": 305,
+    "included": 100,
+    "abstract_count": 90,
+    "metadata_only_count": 10,
+    "excluded_rows": 20,
+    "pending_rows": 185,
+    "unlisted_records": 0,
+    "documents_sha256": "25f77128137e43d99baef42ca3987a1025971b92c2e784bdabf6fce8bc8bf394"
+  },
+  "pilot": {
+    "snapshot_id": "openalex_20261105_s12",
+    "snapshot_sha256": "d788feb807b1cd7c9c783ab28b4ed73d0442c13cfb8ee96fcfb903508f4c3b77",
+    "raw_records": 305,
+    "normalized_unique": 305,
+    "merged_records": 0,
+    "quarantine": [],
+    "warnings": [],
+    "review_csv_sha256": "a50b4858c2f34528505aef7e60a29363cead136388d69fbf91a1fdfee15c320a",
+    "review_rows": 20,
+    "included": 20,
+    "abstract_count": 18,
+    "metadata_only_count": 2,
+    "excluded_rows": 0,
+    "pending_rows": 0,
+    "unlisted_records": 285,
+    "documents_sha256": "ed4461ef0f6c86afc2b0533ed7c89f102ecff7cb3f3fa10caeb726cec7528d97"
+  },
+  "languages": {
+    "en": 92,
+    "es": 8
+  },
+  "technologies": {
+    "camara": 42,
+    "ambiente": 14,
+    "ND": 10,
+    "vestible": 29,
+    "mixta": 5
+  },
+  "evidence_labels": {
+    "ND": 87,
+    "laboratorio": 7,
+    "simulada": 5,
+    "real_hogar": 1
+  },
+  "publication_types": {
+    "conference-paper": 41,
+    "article": 43,
+    "dissertation": 9,
+    "other": 1,
+    "book-chapter": 5,
+    "preprint": 1
+  },
+  "pilot_is_subset": true,
+  "offline_replay_byte_identical": true,
+  "snapshot_has_no_configured_secret": true,
+  "tests": {
+    "passed": 59,
+    "skipped": 1,
+    "skipped_reason": "Qdrant integration not needed for ingestion-only change"
+  },
+  "published_to_qdrant": false,
+  "retrieval_quality_evaluated": false
+}
