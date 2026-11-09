@@ -1,0 +1,19 @@
+{
+  "schema_version": 1,
+  "from_date": "2020-01-01",
+  "languages": ["es", "en"],
+  "searches": [
+    {"query": "fall detection deep learning", "has_abstract": true, "max_records": 100},
+    {"query": "fall detection machine learning", "has_abstract": true, "max_records": 80},
+    {"query": "fall detection smart home", "has_abstract": true, "max_records": 40},
+    {"query": "human fall detection", "has_abstract": true, "max_records": 40},
+    {"query": "detección de caídas", "has_abstract": true, "max_records": 20},
+    {"query": "fall detection deep learning", "has_abstract": false, "max_records": 30}
+  ],
+  "per_page": 50,
+  "max_requests": 40,
+  "timeout_seconds": 30,
+  "max_retries": 3,
+  "request_interval_seconds": 0.3,
+  "max_retry_wait_seconds": 30
+}

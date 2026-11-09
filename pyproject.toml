@@ -1,0 +1,45 @@
+[build-system]
+requires = ["hatchling==1.27.0"]
+build-backend = "hatchling.build"
+
+[project]
+name = "asistente-literatura"
+version = "0.1.0"
+description = "Buscador local de literatura sobre detección de caídas en el hogar"
+requires-python = ">=3.12,<3.13"
+dependencies = [
+  "fastapi==0.162.0", "uvicorn==0.54.0", "pydantic==2.14.2",
+  "pydantic-settings==2.16.2", "httpx==0.28.1", "qdrant-client==1.20.0",
+  "sentence-transformers==6.2.0", "huggingface-hub==2.4.0", "torch==2.15.0",
+]
+
+[project.scripts]
+asistente = "app.cli:main"
+
+[dependency-groups]
+dev = ["pytest==9.2.0", "ruff==0.17.3"]
+
+[tool.hatch.build.targets.wheel]
+packages = ["backend/app"]
+
+[tool.uv]
+cache-dir = ".cache/uv"
+
+[[tool.uv.index]]
+name = "pytorch-cpu"
+url = "https://download.pytorch.org/whl/cpu"
+explicit = true
+
+[tool.uv.sources]
+torch = [{ index = "pytorch-cpu", marker = "sys_platform == 'linux' or sys_platform == 'win32'" }]
+
+[tool.pytest.ini_options]
+testpaths = ["backend/tests"]
+markers = ["integration: requiere Qdrant real; habilitar con QDRANT_TEST_URL"]
+
+[tool.ruff]
+target-version = "py312"
+line-length = 100
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "UP", "B"]
