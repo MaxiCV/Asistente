@@ -150,7 +150,7 @@ jobs:
 
           check = subprocess.run(
               ["ssh-keygen", "-y", "-f", str(key_path)],
-              stdout=subprocess.DEVNULL,
+              stdout=subprocess.PIPE,
               stderr=subprocess.PIPE,
               text=True,
           )
@@ -158,21 +158,34 @@ jobs:
               err = (check.stderr or "formato invalido").strip().splitlines()[0]
               print(f"::error::El secreto GCP_VM_SSH_KEY no es una clave privada SSH valida ({err}).", file=sys.stderr)
               sys.exit(1)
+
+          fp = subprocess.run(
+              ["ssh-keygen", "-l", "-f", str(key_path)],
+              stdout=subprocess.PIPE,
+              stderr=subprocess.PIPE,
+              text=True,
+          )
+          if fp.returncode == 0 and fp.stdout.strip():
+              print(f"Clave SSH validada: {fp.stdout.strip()}")
           PY
 
       - name: Actualizar codigo y contenedores por SSH
-        uses: appleboy/ssh-action@v1.1.0
-        with:
-          host: ${{ secrets.GCP_VM_HOST }}
-          username: ${{ secrets.GCP_VM_USER }}
-          key_path: ${{ runner.temp }}/deploy_key
-          command_timeout: 10m
-          script: |
-            set -e
-            cd ~/Asistente
-            git fetch origin main
-            git reset --hard ${{ github.sha }}
-            docker compose up -d --build api web
+        env:
+          HOST: ${{ secrets.GCP_VM_HOST }}
+          USERNAME: ${{ secrets.GCP_VM_USER }}
+          TARGET_SHA: ${{ github.sha }}
+        run: |
+          HOST_CLEAN="$(printf '%s' "$HOST" | tr -d '\r\n[:space:]')"
+          USER_CLEAN="$(printf '%s' "$USERNAME" | tr -d '\r\n[:space:]')"
+          ssh \
+            -i "${RUNNER_TEMP}/deploy_key" \
+            -o BatchMode=yes \
+            -o StrictHostKeyChecking=accept-new \
+            -o ConnectTimeout=30 \
+            -o ServerAliveInterval=30 \
+            -o ServerAliveCountMax=20 \
+            "${USER_CLEAN}@${HOST_CLEAN}" \
+            "set -e && cd ~/Asistente && git fetch origin main && git reset --hard '${TARGET_SHA}' && docker compose up -d --build api web"
 
       - name: Limpiar clave SSH temporal
         if: always()
