@@ -144,9 +144,7 @@ jobs:
               )
               sys.exit(1)
 
-          ssh_dir = Path.home() / ".ssh"
-          ssh_dir.mkdir(mode=0o700, exist_ok=True)
-          key_path = ssh_dir / "deploy_key"
+          key_path = Path(os.environ["RUNNER_TEMP"]) / "deploy_key"
           key_path.write_text(raw.strip() + "\n", encoding="utf-8")
           key_path.chmod(0o600)
 
@@ -167,7 +165,7 @@ jobs:
         with:
           host: ${{ secrets.GCP_VM_HOST }}
           username: ${{ secrets.GCP_VM_USER }}
-          key_path: ~/.ssh/deploy_key
+          key_path: ${{ runner.temp }}/deploy_key
           command_timeout: 10m
           script: |
             set -e
@@ -178,4 +176,4 @@ jobs:
 
       - name: Limpiar clave SSH temporal
         if: always()
-        run: rm -f ~/.ssh/deploy_key
+        run: rm -f "${{ runner.temp }}/deploy_key"
