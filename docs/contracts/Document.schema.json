@@ -1,0 +1,222 @@
+{
+  "$defs": {
+    "Author": {
+      "additionalProperties": false,
+      "properties": {
+        "name": {
+          "minLength": 1,
+          "title": "Name",
+          "type": "string"
+        },
+        "orcid": {
+          "anyOf": [
+            {
+              "format": "uri",
+              "maxLength": 2083,
+              "minLength": 1,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Orcid"
+        }
+      },
+      "required": [
+        "name"
+      ],
+      "title": "Author",
+      "type": "object"
+    },
+    "Evidence": {
+      "enum": [
+        "laboratorio",
+        "simulada",
+        "real_hogar",
+        "mixta",
+        "ND"
+      ],
+      "title": "Evidence",
+      "type": "string"
+    },
+    "SourceIdentity": {
+      "additionalProperties": false,
+      "properties": {
+        "openalex_id": {
+          "pattern": "^https://openalex.org/W[0-9]+$",
+          "title": "Openalex Id",
+          "type": "string"
+        },
+        "snapshot_id": {
+          "pattern": "^[a-z0-9][a-z0-9_-]{0,63}$",
+          "title": "Snapshot Id",
+          "type": "string"
+        },
+        "retrieved_at": {
+          "format": "date-time",
+          "title": "Retrieved At",
+          "type": "string"
+        }
+      },
+      "required": [
+        "openalex_id",
+        "snapshot_id",
+        "retrieved_at"
+      ],
+      "title": "SourceIdentity",
+      "type": "object"
+    },
+    "Technology": {
+      "enum": [
+        "camara",
+        "vestible",
+        "ambiente",
+        "mixta",
+        "ND"
+      ],
+      "title": "Technology",
+      "type": "string"
+    }
+  },
+  "additionalProperties": false,
+  "properties": {
+    "schema_version": {
+      "const": 1,
+      "default": 1,
+      "title": "Schema Version",
+      "type": "integer"
+    },
+    "document_id": {
+      "format": "uuid",
+      "title": "Document Id",
+      "type": "string"
+    },
+    "document_type": {
+      "const": "publication",
+      "default": "publication",
+      "title": "Document Type",
+      "type": "string"
+    },
+    "publication_type": {
+      "anyOf": [
+        {
+          "minLength": 1,
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Publication Type"
+    },
+    "title": {
+      "minLength": 1,
+      "title": "Title",
+      "type": "string"
+    },
+    "authors": {
+      "items": {
+        "$ref": "#/$defs/Author"
+      },
+      "title": "Authors",
+      "type": "array"
+    },
+    "publication_date": {
+      "anyOf": [
+        {
+          "format": "date",
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Publication Date"
+    },
+    "language": {
+      "anyOf": [
+        {
+          "enum": [
+            "es",
+            "en"
+          ],
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Language"
+    },
+    "doi": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Doi"
+    },
+    "source_url": {
+      "format": "uri",
+      "maxLength": 2083,
+      "minLength": 1,
+      "title": "Source Url",
+      "type": "string"
+    },
+    "abstract": {
+      "anyOf": [
+        {
+          "minLength": 1,
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Abstract"
+    },
+    "content_level": {
+      "enum": [
+        "metadata",
+        "abstract"
+      ],
+      "title": "Content Level",
+      "type": "string"
+    },
+    "identities": {
+      "items": {
+        "$ref": "#/$defs/SourceIdentity"
+      },
+      "minItems": 1,
+      "title": "Identities",
+      "type": "array"
+    },
+    "technology": {
+      "$ref": "#/$defs/Technology",
+      "default": "ND"
+    },
+    "evidence": {
+      "$ref": "#/$defs/Evidence",
+      "default": "ND"
+    }
+  },
+  "required": [
+    "document_id",
+    "title",
+    "source_url",
+    "content_level",
+    "identities"
+  ],
+  "title": "Document",
+  "type": "object"
+}

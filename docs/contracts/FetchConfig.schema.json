@@ -1,0 +1,114 @@
+{
+  "$defs": {
+    "FetchSearch": {
+      "additionalProperties": false,
+      "properties": {
+        "query": {
+          "minLength": 1,
+          "title": "Query",
+          "type": "string"
+        },
+        "has_abstract": {
+          "title": "Has Abstract",
+          "type": "boolean"
+        },
+        "max_records": {
+          "maximum": 1000,
+          "minimum": 1,
+          "title": "Max Records",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "query",
+        "has_abstract",
+        "max_records"
+      ],
+      "title": "FetchSearch",
+      "type": "object"
+    }
+  },
+  "additionalProperties": false,
+  "properties": {
+    "schema_version": {
+      "const": 1,
+      "default": 1,
+      "title": "Schema Version",
+      "type": "integer"
+    },
+    "from_date": {
+      "default": "2020-01-01",
+      "format": "date",
+      "title": "From Date",
+      "type": "string"
+    },
+    "languages": {
+      "items": {
+        "enum": [
+          "es",
+          "en"
+        ],
+        "type": "string"
+      },
+      "minItems": 1,
+      "title": "Languages",
+      "type": "array"
+    },
+    "searches": {
+      "items": {
+        "$ref": "#/$defs/FetchSearch"
+      },
+      "maxItems": 20,
+      "minItems": 1,
+      "title": "Searches",
+      "type": "array"
+    },
+    "per_page": {
+      "default": 50,
+      "maximum": 100,
+      "minimum": 1,
+      "title": "Per Page",
+      "type": "integer"
+    },
+    "max_requests": {
+      "default": 40,
+      "maximum": 500,
+      "minimum": 1,
+      "title": "Max Requests",
+      "type": "integer"
+    },
+    "timeout_seconds": {
+      "default": 30,
+      "exclusiveMinimum": 0,
+      "maximum": 120,
+      "title": "Timeout Seconds",
+      "type": "number"
+    },
+    "max_retries": {
+      "default": 3,
+      "maximum": 5,
+      "minimum": 0,
+      "title": "Max Retries",
+      "type": "integer"
+    },
+    "request_interval_seconds": {
+      "default": 0.3,
+      "maximum": 30,
+      "minimum": 0,
+      "title": "Request Interval Seconds",
+      "type": "number"
+    },
+    "max_retry_wait_seconds": {
+      "default": 30,
+      "maximum": 60,
+      "minimum": 1,
+      "title": "Max Retry Wait Seconds",
+      "type": "number"
+    }
+  },
+  "required": [
+    "searches"
+  ],
+  "title": "FetchConfig",
+  "type": "object"
+}

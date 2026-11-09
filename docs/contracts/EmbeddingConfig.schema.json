@@ -1,0 +1,57 @@
+{
+  "additionalProperties": false,
+  "properties": {
+    "model_id": {
+      "const": "intfloat/multilingual-e5-small",
+      "title": "Model Id",
+      "type": "string"
+    },
+    "revision": {
+      "pattern": "^[0-9a-f]{40}$",
+      "title": "Revision",
+      "type": "string"
+    },
+    "dimensions": {
+      "const": 384,
+      "default": 384,
+      "title": "Dimensions",
+      "type": "integer"
+    },
+    "max_tokens": {
+      "const": 512,
+      "default": 512,
+      "title": "Max Tokens",
+      "type": "integer"
+    },
+    "query_prefix": {
+      "const": "query: ",
+      "default": "query: ",
+      "title": "Query Prefix",
+      "type": "string"
+    },
+    "passage_prefix": {
+      "const": "passage: ",
+      "default": "passage: ",
+      "title": "Passage Prefix",
+      "type": "string"
+    },
+    "normalize": {
+      "const": true,
+      "default": true,
+      "title": "Normalize",
+      "type": "boolean"
+    },
+    "distance": {
+      "const": "Cosine",
+      "default": "Cosine",
+      "title": "Distance",
+      "type": "string"
+    }
+  },
+  "required": [
+    "model_id",
+    "revision"
+  ],
+  "title": "EmbeddingConfig",
+  "type": "object"
+}

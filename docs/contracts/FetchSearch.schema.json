@@ -1,0 +1,27 @@
+{
+  "additionalProperties": false,
+  "properties": {
+    "query": {
+      "minLength": 1,
+      "title": "Query",
+      "type": "string"
+    },
+    "has_abstract": {
+      "title": "Has Abstract",
+      "type": "boolean"
+    },
+    "max_records": {
+      "maximum": 1000,
+      "minimum": 1,
+      "title": "Max Records",
+      "type": "integer"
+    }
+  },
+  "required": [
+    "query",
+    "has_abstract",
+    "max_records"
+  ],
+  "title": "FetchSearch",
+  "type": "object"
+}

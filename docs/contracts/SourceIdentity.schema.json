@@ -1,0 +1,27 @@
+{
+  "additionalProperties": false,
+  "properties": {
+    "openalex_id": {
+      "pattern": "^https://openalex.org/W[0-9]+$",
+      "title": "Openalex Id",
+      "type": "string"
+    },
+    "snapshot_id": {
+      "pattern": "^[a-z0-9][a-z0-9_-]{0,63}$",
+      "title": "Snapshot Id",
+      "type": "string"
+    },
+    "retrieved_at": {
+      "format": "date-time",
+      "title": "Retrieved At",
+      "type": "string"
+    }
+  },
+  "required": [
+    "openalex_id",
+    "snapshot_id",
+    "retrieved_at"
+  ],
+  "title": "SourceIdentity",
+  "type": "object"
+}

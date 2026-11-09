@@ -1,0 +1,83 @@
+{
+  "additionalProperties": false,
+  "properties": {
+    "schema_version": {
+      "const": 1,
+      "default": 1,
+      "title": "Schema Version",
+      "type": "integer"
+    },
+    "passage_id": {
+      "format": "uuid",
+      "title": "Passage Id",
+      "type": "string"
+    },
+    "document_id": {
+      "format": "uuid",
+      "title": "Document Id",
+      "type": "string"
+    },
+    "position": {
+      "minimum": 0,
+      "title": "Position",
+      "type": "integer"
+    },
+    "text": {
+      "minLength": 1,
+      "title": "Text",
+      "type": "string"
+    },
+    "token_count": {
+      "exclusiveMinimum": 0,
+      "title": "Token Count",
+      "type": "integer"
+    },
+    "text_sha256": {
+      "pattern": "^[0-9a-f]{64}$",
+      "title": "Text Sha256",
+      "type": "string"
+    },
+    "publication_date": {
+      "anyOf": [
+        {
+          "format": "date",
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Publication Date"
+    },
+    "document_type": {
+      "const": "publication",
+      "default": "publication",
+      "title": "Document Type",
+      "type": "string"
+    },
+    "publication_type": {
+      "anyOf": [
+        {
+          "minLength": 1,
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Publication Type"
+    }
+  },
+  "required": [
+    "passage_id",
+    "document_id",
+    "position",
+    "text",
+    "token_count",
+    "text_sha256"
+  ],
+  "title": "Passage",
+  "type": "object"
+}

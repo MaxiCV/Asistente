@@ -1,0 +1,87 @@
+{
+  "additionalProperties": false,
+  "properties": {
+    "q": {
+      "maxLength": 300,
+      "minLength": 1,
+      "title": "Q",
+      "type": "string"
+    },
+    "page": {
+      "default": 1,
+      "minimum": 1,
+      "title": "Page",
+      "type": "integer"
+    },
+    "page_size": {
+      "default": 20,
+      "maximum": 100,
+      "minimum": 1,
+      "title": "Page Size",
+      "type": "integer"
+    },
+    "date_from": {
+      "anyOf": [
+        {
+          "format": "date",
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Date From"
+    },
+    "date_to": {
+      "anyOf": [
+        {
+          "format": "date",
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Date To"
+    },
+    "document_type": {
+      "const": "publication",
+      "default": "publication",
+      "title": "Document Type",
+      "type": "string"
+    },
+    "publication_type": {
+      "anyOf": [
+        {
+          "minLength": 1,
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Publication Type"
+    },
+    "index_generation": {
+      "anyOf": [
+        {
+          "pattern": "^[a-z0-9][a-z0-9_-]{0,63}$",
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Index Generation"
+    }
+  },
+  "required": [
+    "q"
+  ],
+  "title": "SearchParams",
+  "type": "object"
+}

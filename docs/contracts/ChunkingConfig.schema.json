@@ -1,0 +1,31 @@
+{
+  "additionalProperties": false,
+  "properties": {
+    "method": {
+      "const": "token-window-v1",
+      "default": "token-window-v1",
+      "title": "Method",
+      "type": "string"
+    },
+    "max_tokens": {
+      "default": 512,
+      "exclusiveMinimum": 0,
+      "title": "Max Tokens",
+      "type": "integer"
+    },
+    "overlap_tokens": {
+      "default": 32,
+      "minimum": 0,
+      "title": "Overlap Tokens",
+      "type": "integer"
+    },
+    "include_title": {
+      "const": true,
+      "default": true,
+      "title": "Include Title",
+      "type": "boolean"
+    }
+  },
+  "title": "ChunkingConfig",
+  "type": "object"
+}

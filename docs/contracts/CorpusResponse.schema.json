@@ -1,0 +1,394 @@
+{
+  "$defs": {
+    "ChunkingConfig": {
+      "additionalProperties": false,
+      "properties": {
+        "method": {
+          "const": "token-window-v1",
+          "default": "token-window-v1",
+          "title": "Method",
+          "type": "string"
+        },
+        "max_tokens": {
+          "default": 512,
+          "exclusiveMinimum": 0,
+          "title": "Max Tokens",
+          "type": "integer"
+        },
+        "overlap_tokens": {
+          "default": 32,
+          "minimum": 0,
+          "title": "Overlap Tokens",
+          "type": "integer"
+        },
+        "include_title": {
+          "const": true,
+          "default": true,
+          "title": "Include Title",
+          "type": "boolean"
+        }
+      },
+      "title": "ChunkingConfig",
+      "type": "object"
+    },
+    "EmbeddingConfig": {
+      "additionalProperties": false,
+      "properties": {
+        "model_id": {
+          "const": "intfloat/multilingual-e5-small",
+          "title": "Model Id",
+          "type": "string"
+        },
+        "revision": {
+          "pattern": "^[0-9a-f]{40}$",
+          "title": "Revision",
+          "type": "string"
+        },
+        "dimensions": {
+          "const": 384,
+          "default": 384,
+          "title": "Dimensions",
+          "type": "integer"
+        },
+        "max_tokens": {
+          "const": 512,
+          "default": 512,
+          "title": "Max Tokens",
+          "type": "integer"
+        },
+        "query_prefix": {
+          "const": "query: ",
+          "default": "query: ",
+          "title": "Query Prefix",
+          "type": "string"
+        },
+        "passage_prefix": {
+          "const": "passage: ",
+          "default": "passage: ",
+          "title": "Passage Prefix",
+          "type": "string"
+        },
+        "normalize": {
+          "const": true,
+          "default": true,
+          "title": "Normalize",
+          "type": "boolean"
+        },
+        "distance": {
+          "const": "Cosine",
+          "default": "Cosine",
+          "title": "Distance",
+          "type": "string"
+        }
+      },
+      "required": [
+        "model_id",
+        "revision"
+      ],
+      "title": "EmbeddingConfig",
+      "type": "object"
+    },
+    "GenerationManifest": {
+      "additionalProperties": false,
+      "properties": {
+        "schema_version": {
+          "const": 1,
+          "default": 1,
+          "title": "Schema Version",
+          "type": "integer"
+        },
+        "generation_id": {
+          "pattern": "^[a-z0-9][a-z0-9_-]{0,63}$",
+          "title": "Generation Id",
+          "type": "string"
+        },
+        "status": {
+          "const": "validated",
+          "default": "validated",
+          "title": "Status",
+          "type": "string"
+        },
+        "created_at": {
+          "format": "date-time",
+          "title": "Created At",
+          "type": "string"
+        },
+        "documents_collection": {
+          "minLength": 1,
+          "title": "Documents Collection",
+          "type": "string"
+        },
+        "passages_collection": {
+          "minLength": 1,
+          "title": "Passages Collection",
+          "type": "string"
+        },
+        "snapshot_id": {
+          "pattern": "^[a-z0-9][a-z0-9_-]{0,63}$",
+          "title": "Snapshot Id",
+          "type": "string"
+        },
+        "snapshot_sha256": {
+          "pattern": "^[0-9a-f]{64}$",
+          "title": "Snapshot Sha256",
+          "type": "string"
+        },
+        "review_csv_sha256": {
+          "pattern": "^[0-9a-f]{64}$",
+          "title": "Review Csv Sha256",
+          "type": "string"
+        },
+        "config_sha256": {
+          "pattern": "^[0-9a-f]{64}$",
+          "title": "Config Sha256",
+          "type": "string"
+        },
+        "embedding": {
+          "$ref": "#/$defs/EmbeddingConfig"
+        },
+        "chunking": {
+          "$ref": "#/$defs/ChunkingConfig"
+        },
+        "document_count": {
+          "minimum": 0,
+          "title": "Document Count",
+          "type": "integer"
+        },
+        "passage_count": {
+          "minimum": 0,
+          "title": "Passage Count",
+          "type": "integer"
+        },
+        "abstract_count": {
+          "minimum": 0,
+          "title": "Abstract Count",
+          "type": "integer"
+        },
+        "excluded_count": {
+          "minimum": 0,
+          "title": "Excluded Count",
+          "type": "integer"
+        },
+        "pending_count": {
+          "minimum": 0,
+          "title": "Pending Count",
+          "type": "integer"
+        },
+        "publication_types": {
+          "items": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "title": "Publication Types",
+          "type": "array"
+        }
+      },
+      "required": [
+        "generation_id",
+        "created_at",
+        "documents_collection",
+        "passages_collection",
+        "snapshot_id",
+        "snapshot_sha256",
+        "review_csv_sha256",
+        "config_sha256",
+        "embedding",
+        "chunking",
+        "document_count",
+        "passage_count",
+        "abstract_count",
+        "excluded_count",
+        "pending_count"
+      ],
+      "title": "GenerationManifest",
+      "type": "object"
+    },
+    "RunRecord": {
+      "additionalProperties": false,
+      "properties": {
+        "schema_version": {
+          "const": 1,
+          "default": 1,
+          "title": "Schema Version",
+          "type": "integer"
+        },
+        "run_id": {
+          "pattern": "^[a-z0-9][a-z0-9_-]{0,63}$",
+          "title": "Run Id",
+          "type": "string"
+        },
+        "operation": {
+          "enum": [
+            "fetch",
+            "build",
+            "publish",
+            "rollback"
+          ],
+          "title": "Operation",
+          "type": "string"
+        },
+        "status": {
+          "enum": [
+            "running",
+            "succeeded",
+            "failed"
+          ],
+          "title": "Status",
+          "type": "string"
+        },
+        "started_at": {
+          "format": "date-time",
+          "title": "Started At",
+          "type": "string"
+        },
+        "finished_at": {
+          "anyOf": [
+            {
+              "format": "date-time",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Finished At"
+        },
+        "snapshot_id": {
+          "anyOf": [
+            {
+              "pattern": "^[a-z0-9][a-z0-9_-]{0,63}$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Snapshot Id"
+        },
+        "generation_id": {
+          "anyOf": [
+            {
+              "pattern": "^[a-z0-9][a-z0-9_-]{0,63}$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Generation Id"
+        },
+        "error_code": {
+          "anyOf": [
+            {
+              "minLength": 1,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Error Code"
+        }
+      },
+      "required": [
+        "run_id",
+        "operation",
+        "status",
+        "started_at"
+      ],
+      "title": "RunRecord",
+      "type": "object"
+    }
+  },
+  "additionalProperties": false,
+  "properties": {
+    "index_generation": {
+      "anyOf": [
+        {
+          "pattern": "^[a-z0-9][a-z0-9_-]{0,63}$",
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "title": "Index Generation"
+    },
+    "document_count": {
+      "minimum": 0,
+      "title": "Document Count",
+      "type": "integer"
+    },
+    "abstract_count": {
+      "minimum": 0,
+      "title": "Abstract Count",
+      "type": "integer"
+    },
+    "abstract_coverage": {
+      "maximum": 1,
+      "minimum": 0,
+      "title": "Abstract Coverage",
+      "type": "number"
+    },
+    "last_run": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/RunRecord"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null
+    },
+    "manifest": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/GenerationManifest"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null
+    },
+    "published_at": {
+      "anyOf": [
+        {
+          "format": "date-time",
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Published At"
+    },
+    "publication_types": {
+      "items": {
+        "minLength": 1,
+        "type": "string"
+      },
+      "title": "Publication Types",
+      "type": "array"
+    },
+    "maintenance_status_unavailable": {
+      "default": false,
+      "title": "Maintenance Status Unavailable",
+      "type": "boolean"
+    }
+  },
+  "required": [
+    "index_generation",
+    "document_count",
+    "abstract_count",
+    "abstract_coverage"
+  ],
+  "title": "CorpusResponse",
+  "type": "object"
+}

@@ -1,0 +1,27 @@
+{
+  "additionalProperties": false,
+  "properties": {
+    "generation_id": {
+      "pattern": "^[a-z0-9][a-z0-9_-]{0,63}$",
+      "title": "Generation Id",
+      "type": "string"
+    },
+    "manifest_sha256": {
+      "pattern": "^[0-9a-f]{64}$",
+      "title": "Manifest Sha256",
+      "type": "string"
+    },
+    "published_at": {
+      "format": "date-time",
+      "title": "Published At",
+      "type": "string"
+    }
+  },
+  "required": [
+    "generation_id",
+    "manifest_sha256",
+    "published_at"
+  ],
+  "title": "PublicationReceipt",
+  "type": "object"
+}

@@ -1,0 +1,90 @@
+{
+  "$defs": {
+    "Evidence": {
+      "enum": [
+        "laboratorio",
+        "simulada",
+        "real_hogar",
+        "mixta",
+        "ND"
+      ],
+      "title": "Evidence",
+      "type": "string"
+    },
+    "Technology": {
+      "enum": [
+        "camara",
+        "vestible",
+        "ambiente",
+        "mixta",
+        "ND"
+      ],
+      "title": "Technology",
+      "type": "string"
+    }
+  },
+  "additionalProperties": false,
+  "properties": {
+    "openalex_id": {
+      "pattern": "^https://openalex.org/W[0-9]+$",
+      "title": "Openalex Id",
+      "type": "string"
+    },
+    "snapshot_id": {
+      "pattern": "^[a-z0-9][a-z0-9_-]{0,63}$",
+      "title": "Snapshot Id",
+      "type": "string"
+    },
+    "decision": {
+      "enum": [
+        "incluir",
+        "excluir",
+        "pendiente"
+      ],
+      "title": "Decision",
+      "type": "string"
+    },
+    "motivo": {
+      "minLength": 1,
+      "title": "Motivo",
+      "type": "string"
+    },
+    "tecnologia": {
+      "$ref": "#/$defs/Technology"
+    },
+    "evidencia": {
+      "$ref": "#/$defs/Evidence"
+    },
+    "tiene_resumen": {
+      "enum": [
+        "si",
+        "no"
+      ],
+      "title": "Tiene Resumen",
+      "type": "string"
+    },
+    "fecha_revision": {
+      "format": "date",
+      "title": "Fecha Revision",
+      "type": "string"
+    },
+    "nota_evidencia": {
+      "minLength": 1,
+      "title": "Nota Evidencia",
+      "type": "string"
+    }
+  },
+  "required": [
+    "openalex_id",
+    "snapshot_id",
+    "decision",
+    "motivo",
+    "tecnologia",
+    "evidencia",
+    "tiene_resumen",
+    "fecha_revision",
+    "nota_evidencia"
+  ],
+  "title": "ReviewRow",
+  "type": "object"
+}
