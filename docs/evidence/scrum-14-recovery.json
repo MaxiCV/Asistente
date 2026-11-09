@@ -1,0 +1,58 @@
+{
+  "checked_at": "2026-11-07T22:57:20.002290+00:00",
+  "qdrant_version": "1.20.0",
+  "restored_generation": "s13_20261105_v2",
+  "all_payloads_and_vectors_equal": true,
+  "original_unchanged": true,
+  "pilot": {
+    "schema_version": 1,
+    "generation_id": "s14_pilot_20261107_225706",
+    "status": "validated",
+    "created_at": "2026-11-07T22:57:17.407547Z",
+    "documents_collection": "documents_s14_pilot_20261107_225706",
+    "passages_collection": "passages_s14_pilot_20261107_225706",
+    "snapshot_id": "openalex_20261105_s12",
+    "snapshot_sha256": "d788feb807b1cd7c9c783ab28b4ed73d0442c13cfb8ee96fcfb903508f4c3b77",
+    "review_csv_sha256": "a50b4858c2f34528505aef7e60a29363cead136388d69fbf91a1fdfee15c320a",
+    "config_sha256": "1ab1745e41a7332fe01e47e8844965835975d34736f9e01a07aa093476a93a6d",
+    "embedding": {
+      "model_id": "intfloat/multilingual-e5-small",
+      "revision": "614241f622f53c4eeff9890bdc4f31cfecc418b3",
+      "dimensions": 384,
+      "max_tokens": 512,
+      "query_prefix": "query: ",
+      "passage_prefix": "passage: ",
+      "normalize": true,
+      "distance": "Cosine"
+    },
+    "chunking": {
+      "method": "token-window-v1",
+      "max_tokens": 512,
+      "overlap_tokens": 32,
+      "include_title": true
+    },
+    "document_count": 20,
+    "passage_count": 22,
+    "abstract_count": 18,
+    "excluded_count": 0,
+    "pending_count": 285,
+    "publication_types": [
+      "article",
+      "conference-paper",
+      "dissertation",
+      "other"
+    ]
+  },
+  "queries": [
+    {
+      "query": "detección de caídas en el hogar",
+      "unique_documents": 20
+    },
+    {
+      "query": "wearable fall detection at home",
+      "unique_documents": 20
+    }
+  ],
+  "rollback_restores_100_documents": true,
+  "quality_evaluated": false
+}

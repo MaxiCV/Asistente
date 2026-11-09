@@ -1,0 +1,15 @@
+{
+  "checked_at": "2026-11-07T22:56:37.972854+00:00",
+  "external_tcp_errno": 101,
+  "openalex_unreachable": true,
+  "error_type": "URLError",
+  "ready": {
+    "status": "ready",
+    "checks": {
+      "qdrant": true,
+      "model": true,
+      "corpus": true
+    },
+    "index_generation": "s13_20261105_v2"
+  }
+}

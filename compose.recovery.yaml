@@ -1,0 +1,38 @@
+# Recovery drill: API has no external route; distinct volumes and access ports.
+name: asistente-recovery
+services:
+  qdrant:
+    image: qdrant/qdrant:v1.20.0
+    networks: [default, access]
+    ports:
+      - "127.0.0.1:6335:6333"
+    volumes:
+      - recovery_storage:/qdrant/storage
+  api:
+    image: asistente-literatura-api:latest
+    environment:
+      QDRANT_URL: http://qdrant:6333
+      ASISTENTE_DATA_DIR: /app/data
+      HF_HUB_OFFLINE: "1"
+      TRANSFORMERS_OFFLINE: "1"
+      EMBEDDING_DEVICE: cpu
+    volumes:
+      - ./data/recovery/restored/data:/app/data:ro
+      - ./data/recovery/restored/config:/app/config:ro
+    depends_on:
+      - qdrant
+  web:
+    image: asistente-literatura-web:latest
+    networks: [default, access]
+    ports:
+      - "127.0.0.1:5174:5173"
+    environment:
+      API_PROXY_TARGET: http://api:8000
+    depends_on:
+      - api
+networks:
+  default:
+    internal: true
+  access:
+volumes:
+  recovery_storage:
