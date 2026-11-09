@@ -1,0 +1,8 @@
+{
+  "load_seconds": 25.59969529999944,
+  "encode_and_write_seconds": 22.285709099998712,
+  "max_passage_tokens": 510,
+  "multi_passage_documents": 3,
+  "offline_model": true,
+  "quality_evaluated": false
+}

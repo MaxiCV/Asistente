@@ -1,0 +1,41 @@
+{
+  "schema_version": 1,
+  "generation_id": "s13_20261105_v2",
+  "status": "validated",
+  "created_at": "2026-11-05T20:43:00.492374Z",
+  "documents_collection": "documents_s13_20261105_v2",
+  "passages_collection": "passages_s13_20261105_v2",
+  "snapshot_id": "openalex_20261105_s12",
+  "snapshot_sha256": "d788feb807b1cd7c9c783ab28b4ed73d0442c13cfb8ee96fcfb903508f4c3b77",
+  "review_csv_sha256": "18c25bcc4521405daaed3fe3801b20531c111007ac03817b4d375b30a2e92e7d",
+  "config_sha256": "1ab1745e41a7332fe01e47e8844965835975d34736f9e01a07aa093476a93a6d",
+  "embedding": {
+    "model_id": "intfloat/multilingual-e5-small",
+    "revision": "614241f622f53c4eeff9890bdc4f31cfecc418b3",
+    "dimensions": 384,
+    "max_tokens": 512,
+    "query_prefix": "query: ",
+    "passage_prefix": "passage: ",
+    "normalize": true,
+    "distance": "Cosine"
+  },
+  "chunking": {
+    "method": "token-window-v1",
+    "max_tokens": 512,
+    "overlap_tokens": 32,
+    "include_title": true
+  },
+  "document_count": 100,
+  "passage_count": 103,
+  "abstract_count": 90,
+  "excluded_count": 20,
+  "pending_count": 185,
+  "publication_types": [
+    "article",
+    "book-chapter",
+    "conference-paper",
+    "dissertation",
+    "other",
+    "preprint"
+  ]
+}
