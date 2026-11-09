@@ -75,7 +75,7 @@ Estado de referencia al 8 de noviembre de 2026, según el código y los registro
 
 - Selección y autorización definitivas de la fuente de patentes; EPO OPS aún es candidato.
 - Proveedor/modelo generativo y sus condiciones operativas para el chat.
-- Nombre definitivo del producto y compromisos de marca. La interfaz actual utiliza «Observatorio» y el repositorio «Asistente de revisión de literatura»; estos nombres existentes no constituyen una decisión de marca nueva.
+- Nombre definitivo del producto y compromisos de marca. Desde la revisión visual del 9 de noviembre, la interfaz utiliza «Nexo», con un símbolo de libro abierto y puntos conectados; el repositorio conserva «Asistente de revisión de literatura».
 - Requisitos de despliegue posteriores a la demostración local y cualquier ampliación del dominio o del público.
 - Estándar formal de accesibilidad y validación específica con usuarios; no se declara una certificación.
 

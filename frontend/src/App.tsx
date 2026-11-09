@@ -168,8 +168,8 @@ function Detail({
         maxWidth="md"
         aria-labelledby="document-title"
       >
-        <DialogTitle id="document-title" className="reading-header">
-          <span>Ficha de la publicación</span>
+        <DialogTitle id="reading-header" component="div" className="reading-header">
+          <span id="document-title">Ficha de la publicación</span>
           <IconButton aria-label="Cerrar ficha" onClick={close}>
             <Icon name="close" />
           </IconButton>
@@ -386,34 +386,15 @@ export default function App() {
         Ir a la búsqueda
       </a>
       <header className="header">
-        <a className="brand" href="/" aria-label="Observatorio, inicio">
-          <span aria-hidden="true" className="brand-mark">
-            o.
-          </span>
+        <a className="brand" href="/" aria-label="Nexo, inicio">
+          <img className="brand-mark" src="/nexo.svg" alt="" width="48" height="48" />
           <span>
-            Observatorio
+            Nexo
             <span className="brand-caption">Biblioteca de investigación</span>
           </span>
         </a>
-        <span
-          className={`connection ${disabled ? "unavailable" : ""}`}
-          role="status"
-        >
-          {ready.isPending || corpus.isPending
-            ? "Conectando…"
-            : disabled
-              ? "Búsqueda no disponible"
-              : "Colección local disponible"}
-        </span>
       </header>
       <main>
-        <section className="intro" aria-labelledby="page-title">
-          <h1 id="page-title">Literatura sobre detección de caídas</h1>
-          <p className="intro-copy">
-            Explora estudios sobre detección de caídas en el hogar. Busca por
-            significado, revisa los resúmenes y conserva sus referencias.
-          </p>
-        </section>
         {(corpus.isError || ready.isError) && (
           <div className="notice">
             <Failure
@@ -467,7 +448,9 @@ export default function App() {
           }}
         >
           <div className="search-panel">
-            <label htmlFor="query">¿Qué quieres investigar?</label>
+            <h1 className="search-title">
+              <label htmlFor="query">¿Qué quieres investigar?</label>
+            </h1>
             <div className="query-row">
               <div className="query-input">
                 <Icon name="search" />
@@ -877,7 +860,7 @@ export default function App() {
         </form>
       </main>
       <footer>
-        Observatorio · Detección de caídas en el hogar
+        Nexo · Detección de caídas en el hogar
         <span>Machine learning y deep learning · Colección local</span>
       </footer>
       <Detail

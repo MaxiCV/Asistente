@@ -80,7 +80,7 @@ button:disabled {
   padding: 0 40px;
 }
 .header {
-  min-height: 80px;
+  min-height: 88px;
   border-bottom: 1px solid var(--line);
   display: flex;
   justify-content: space-between;
@@ -91,63 +91,35 @@ button:disabled {
   display: inline-flex;
   align-items: center;
   gap: 12px;
-  font-size: 19px;
+  font-size: 32px;
   font-weight: 700;
+  letter-spacing: -0.025em;
   text-decoration: none;
   color: var(--ink);
   line-height: 1.3;
 }
+.brand > span {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+}
 .brand-caption {
   display: block;
-  margin-top: 3px;
-  font-size: 12px;
+  padding-left: 20px;
+  border-left: 1px solid var(--line);
+  font-size: 13px;
   font-weight: 400;
+  letter-spacing: normal;
   color: var(--muted);
 }
 .brand-mark {
-  display: grid;
-  place-items: center;
-  background: var(--ink);
-  color: var(--surface);
-  width: 36px;
-  height: 36px;
-  border-radius: 8px;
-  font-size: 25px;
+  display: block;
+  flex: 0 0 auto;
+  width: 48px;
+  height: 48px;
 }
-.connection {
-  font-size: 13px;
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  color: var(--muted);
-}
-.connection::before {
-  content: "";
-  flex: 0 0 7px;
-  height: 7px;
-  border-radius: 50%;
-  background: var(--action);
-}
-.connection.unavailable::before {
-  background: var(--muted);
-}
-.intro {
-  padding: 28px 0 24px;
-}
-h1 {
-  font-size: clamp(27px, 3.1vw, 36px);
-  font-weight: 650;
-  letter-spacing: -0.025em;
-  line-height: 1.2;
-  text-wrap: balance;
-  margin: 0 0 12px;
-}
-.intro-copy {
-  max-width: 75ch;
-  color: var(--muted);
-  line-height: 1.65;
-  margin: 0;
-  font-size: 15px;
+main {
+  padding-top: 28px;
 }
 .muted,
 .metadata,
@@ -162,16 +134,27 @@ h1 {
   margin-bottom: 18px;
 }
 .search-panel {
-  background: var(--surface);
-  padding: 20px 24px 12px;
-  border: 1px solid var(--line);
-  border-left-color: var(--action);
+  background: var(--ink);
+  color: var(--surface);
+  padding: 24px 28px 12px;
+  border: 1px solid var(--ink);
   border-radius: 12px;
 }
-.search-panel > label {
-  font-weight: 600;
-  display: block;
-  margin-bottom: 10px;
+.search-title {
+  font-size: 32px;
+  font-weight: 650;
+  letter-spacing: -0.025em;
+  line-height: 1.2;
+  text-wrap: balance;
+  margin: 0 0 20px;
+}
+.search-panel :focus-visible {
+  outline: 3px solid var(--surface);
+  outline-offset: 4px;
+}
+.query-row > .MuiButton-root:focus-visible {
+  outline: 3px solid var(--surface);
+  outline-offset: 4px;
 }
 .query-row {
   display: flex;
@@ -206,19 +189,30 @@ input[aria-invalid="true"] {
 }
 .query-input > .icon {
   position: absolute;
-  left: 14px;
+  left: 18px;
   top: 50%;
   transform: translateY(-50%);
   color: var(--muted);
+  width: 24px;
+  height: 24px;
   pointer-events: none;
 }
 .query-input input {
-  padding-left: 44px;
-  min-height: 48px;
-  font-size: 17px;
+  padding-left: 54px;
+  min-height: 60px;
+  font-size: 18px;
 }
-.query-row > button {
-  min-width: 112px;
+.query-row > .MuiButton-root {
+  min-width: 144px;
+  min-height: 60px;
+  border: 1px solid var(--control-line);
+  font-size: 17px;
+  font-weight: 700;
+}
+.query-row > .MuiButton-root.Mui-disabled {
+  background: var(--control-line);
+  color: var(--ink);
+  opacity: 1;
 }
 .examples {
   display: flex;
@@ -227,17 +221,18 @@ input[aria-invalid="true"] {
   margin-top: 6px;
   align-items: center;
   font-size: 13px;
-  color: var(--muted);
+  color: var(--selected);
 }
 .examples button {
-  min-height: 40px;
+  min-height: 44px;
   border: none;
   padding: 8px 0;
   background: none;
-  color: var(--action);
+  color: var(--selected);
   text-align: left;
 }
 .examples button:hover:not(:disabled) {
+  color: var(--surface);
   text-decoration: underline;
   text-underline-offset: 4px;
 }
@@ -656,28 +651,31 @@ dd {
     padding: 0 16px;
   }
   .header {
-    min-height: 76px;
+    min-height: 84px;
     gap: 12px;
   }
   .brand {
-    font-size: 17px;
-    gap: 8px;
+    font-size: 28px;
+    gap: 10px;
+  }
+  .brand > span {
+    display: block;
   }
   .brand-caption {
+    margin-top: 2px;
+    padding-left: 0;
+    border-left: 0;
     font-size: 11px;
   }
-  .connection {
-    font-size: 11px;
-    max-width: 120px;
-  }
-  .intro {
-    padding: 24px 0 20px;
-  }
-  .intro-copy {
-    font-size: 14px;
+  main {
+    padding-top: 20px;
   }
   .search-panel {
-    padding: 18px 16px 10px;
+    padding: 24px 20px 12px;
+  }
+  .search-title {
+    font-size: 28px;
+    margin-bottom: 20px;
   }
   .query-row {
     flex-wrap: wrap;
@@ -687,9 +685,11 @@ dd {
   }
   .query-input input {
     font-size: 16px;
+    min-height: 56px;
   }
-  .query-row > button {
+  .query-row > .MuiButton-root {
     width: 100%;
+    min-height: 52px;
   }
   .examples {
     gap: 0 12px;
