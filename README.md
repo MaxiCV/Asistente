@@ -83,6 +83,7 @@ Crear colecciones no publica datos ni cambia los alias. La CLI construye nuevas 
 - [Captura y selección real de SCRUM-12](docs/implementation-scrum-12.md).
 - [Búsqueda, interfaz y mediciones de SCRUM-13](docs/implementation-scrum-13.md).
 - [Pruebas y recuperación de SCRUM-14](docs/implementation-scrum-14.md).
+- [Conector de patentes EPO OPS: primer incremento de SCRUM-16](docs/implementation-scrum-16.md).
 - [Guion de demo y comandos de respaldo/restauración](docs/demo-local.md).
 
 ## Captura y selección del corpus

@@ -18,6 +18,8 @@ class Settings(BaseSettings):
     qdrant_url: str = "http://127.0.0.1:6333"
     data_dir: Path = Field(default=ROOT / "data", validation_alias="ASISTENTE_DATA_DIR")
     openalex_api_key: SecretStr | None = None
+    epo_ops_consumer_key: SecretStr | None = None
+    epo_ops_consumer_secret: SecretStr | None = None
     embedding_device: str = "cpu"
     embedding_threads: int = Field(default=4, ge=1, le=32)
 

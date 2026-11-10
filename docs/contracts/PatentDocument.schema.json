@@ -1,0 +1,128 @@
+{
+  "additionalProperties": false,
+  "description": "Registro de captura OPS; aún no forma parte del índice de publicaciones.",
+  "properties": {
+    "schema_version": {
+      "const": 1,
+      "default": 1,
+      "title": "Schema Version",
+      "type": "integer"
+    },
+    "document_type": {
+      "const": "patent",
+      "default": "patent",
+      "title": "Document Type",
+      "type": "string"
+    },
+    "source": {
+      "const": "epo_ops",
+      "default": "epo_ops",
+      "title": "Source",
+      "type": "string"
+    },
+    "publication_id": {
+      "pattern": "^[A-Z]{2}\\.[A-Z0-9]+\\.[A-Z][0-9]?$",
+      "title": "Publication Id",
+      "type": "string"
+    },
+    "publication_date": {
+      "anyOf": [
+        {
+          "format": "date",
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Publication Date"
+    },
+    "title": {
+      "anyOf": [
+        {
+          "minLength": 1,
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Title"
+    },
+    "language": {
+      "anyOf": [
+        {
+          "minLength": 1,
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Language"
+    },
+    "abstract": {
+      "anyOf": [
+        {
+          "minLength": 1,
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Abstract"
+    },
+    "abstract_language": {
+      "anyOf": [
+        {
+          "minLength": 1,
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Abstract Language"
+    },
+    "content_level": {
+      "enum": [
+        "metadata",
+        "abstract"
+      ],
+      "title": "Content Level",
+      "type": "string"
+    },
+    "source_url": {
+      "format": "uri",
+      "maxLength": 2083,
+      "minLength": 1,
+      "title": "Source Url",
+      "type": "string"
+    },
+    "snapshot_id": {
+      "pattern": "^[a-z0-9][a-z0-9_-]{0,63}$",
+      "title": "Snapshot Id",
+      "type": "string"
+    },
+    "retrieved_at": {
+      "format": "date-time",
+      "title": "Retrieved At",
+      "type": "string"
+    }
+  },
+  "required": [
+    "publication_id",
+    "content_level",
+    "source_url",
+    "snapshot_id",
+    "retrieved_at"
+  ],
+  "title": "PatentDocument",
+  "type": "object"
+}

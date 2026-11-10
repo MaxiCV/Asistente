@@ -30,6 +30,9 @@ def main() -> int:
     fetch.add_argument("snapshot_id")
     fetch.add_argument("--config", type=Path, default=ROOT / "config/openalex.json")
     fetch.add_argument("--cutoff", type=date.fromisoformat, required=True)
+    patents = commands.add_parser("fetch-patents", help="Capturar bibliografía EPO OPS sin indexar")
+    patents.add_argument("snapshot_id")
+    patents.add_argument("--config", type=Path, default=ROOT / "config/epo_ops.json")
     draft = commands.add_parser(
         "prepare-review", help="Crear un CSV nuevo con decisiones pendientes"
     )
@@ -98,6 +101,12 @@ def main() -> int:
             with qdrant_connection(settings.qdrant_url, timeout=10) as client:
                 names = create_candidate_collections(client, args.generation, config)
             result = {"candidate_collections": names, "published": False}
+        elif args.command == "fetch-patents":
+            from app.contracts import PatentFetchConfig
+            from app.ingestion.epo_ops import fetch_patents
+
+            patent_config = PatentFetchConfig.model_validate_json(args.config.read_text("utf-8"))
+            result = fetch_patents(settings, patent_config, args.snapshot_id)
         elif args.command == "fetch":
             from app.contracts import FetchConfig
             from app.ingestion.openalex import fetch_snapshot

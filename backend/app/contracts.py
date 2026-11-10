@@ -83,6 +83,41 @@ class Author(Contract):
     orcid: HttpUrl | None = None
 
 
+class PatentDocument(Contract):
+    """Registro de captura OPS; aún no forma parte del índice de publicaciones."""
+
+    schema_version: Literal[1] = 1
+    document_type: Literal["patent"] = "patent"
+    source: Literal["epo_ops"] = "epo_ops"
+    publication_id: Annotated[str, StringConstraints(pattern=r"^[A-Z]{2}\.[A-Z0-9]+\.[A-Z][0-9]?$")]
+    publication_date: date | None = None
+    title: Text | None = None
+    language: Text | None = None
+    abstract: Text | None = None
+    abstract_language: Text | None = None
+    content_level: Literal["metadata", "abstract"]
+    source_url: HttpUrl
+    snapshot_id: GenerationId
+    retrieved_at: AwareDatetime
+
+    @model_validator(mode="after")
+    def content_available(self):
+        if (self.content_level == "abstract") != (self.abstract is not None):
+            raise ValueError("content_level debe reflejar el resumen disponible")
+        return self
+
+
+class PatentFetchConfig(Contract):
+    query: Text
+    max_records: int = Field(default=25, ge=1, le=2000)
+    page_size: int = Field(default=25, ge=1, le=100)
+    max_requests: int = Field(default=100, ge=1, le=1000)
+    timeout_seconds: float = Field(default=30, gt=0, le=120)
+    request_interval_seconds: float = Field(default=6, ge=6, le=60)
+    max_retries: int = Field(default=2, ge=0, le=5)
+    max_retry_wait_seconds: float = Field(default=60, ge=1, le=60)
+
+
 class Document(Contract):
     schema_version: Literal[1] = 1
     document_id: UUID
