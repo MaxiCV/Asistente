@@ -56,6 +56,21 @@
         "operationId": "search_api_v1_documents_get",
         "parameters": [
           {
+            "name": "mode",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "enum": [
+                "semantic",
+                "lexical",
+                "hybrid"
+              ],
+              "type": "string",
+              "default": "semantic",
+              "title": "Mode"
+            }
+          },
+          {
             "name": "q",
             "in": "query",
             "required": true,
@@ -375,6 +390,49 @@
           "name"
         ],
         "title": "Author"
+      },
+      "Bm25Config": {
+        "properties": {
+          "model": {
+            "type": "string",
+            "const": "qdrant/bm25",
+            "title": "Model",
+            "default": "qdrant/bm25"
+          },
+          "server_version": {
+            "type": "string",
+            "const": "1.20.0",
+            "title": "Server Version",
+            "default": "1.20.0"
+          },
+          "preprocessing": {
+            "type": "string",
+            "const": "word-lowercase-no-stemming-v1",
+            "title": "Preprocessing",
+            "default": "word-lowercase-no-stemming-v1"
+          },
+          "k": {
+            "type": "number",
+            "const": 1.2,
+            "title": "K",
+            "default": 1.2
+          },
+          "b": {
+            "type": "number",
+            "const": 0.75,
+            "title": "B",
+            "default": 0.75
+          },
+          "avg_len": {
+            "type": "integer",
+            "const": 256,
+            "title": "Avg Len",
+            "default": 256
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "title": "Bm25Config"
       },
       "ChunkingConfig": {
         "properties": {
@@ -810,6 +868,16 @@
           "chunking": {
             "$ref": "#/components/schemas/ChunkingConfig"
           },
+          "bm25": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/Bm25Config"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
           "document_count": {
             "type": "integer",
             "minimum": 0.0,
@@ -994,6 +1062,22 @@
       },
       "SearchResponse": {
         "properties": {
+          "mode": {
+            "type": "string",
+            "enum": [
+              "semantic",
+              "lexical",
+              "hybrid"
+            ],
+            "title": "Mode",
+            "default": "semantic"
+          },
+          "matched_document_count": {
+            "type": "integer",
+            "minimum": 0.0,
+            "title": "Matched Document Count",
+            "default": 0
+          },
           "index_generation": {
             "type": "string",
             "pattern": "^[a-z0-9][a-z0-9_-]{0,63}$",

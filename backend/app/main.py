@@ -24,7 +24,13 @@ from app.contracts import (
 from app.core.config import Settings, embedding_config
 from app.core.qdrant import qdrant_connection
 from app.embeddings.local import LocalEncoder
-from app.search.service import QueryNotEncodable, get_document, latest_run, search_documents
+from app.search.service import (
+    QueryNotEncodable,
+    SearchModeUnavailable,
+    get_document,
+    latest_run,
+    search_documents,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -124,9 +130,19 @@ def create_app(settings: Settings | None = None, encoder_factory=LocalEncoder) -
         "/api/v1/documents", response_model=SearchResponse, responses=unavailable, tags=["Corpus"]
     )
     def search(params: Annotated[SearchParams, Query()]):
-        with reader(params.index_generation) as (client, pinned):
+        with reader(params.index_generation, needs_model=params.mode != "lexical") as (
+            client,
+            pinned,
+        ):
             try:
                 return search_documents(client, pinned, api.state.encoder, params)
+            except SearchModeUnavailable:
+                raise error(
+                    409,
+                    "search_mode_unavailable",
+                    "Esta versión admite solo búsqueda semántica. Selecciona ese modo "
+                    "o publica una generación con BM25.",
+                ) from None
             except QueryNotEncodable:
                 raise error(
                     422,

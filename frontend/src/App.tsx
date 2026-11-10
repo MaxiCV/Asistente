@@ -30,6 +30,7 @@ import type {
 } from "./api";
 
 const initial: Criteria = {
+  mode: "semantic",
   q: "",
   date_from: "",
   date_to: "",
@@ -330,7 +331,7 @@ export default function App() {
   const data = search.data;
   const active = corpus.data;
   const disabled =
-    ready.isPending || ready.isError || corpus.isPending || corpus.isError;
+    (draft.mode !== "lexical" && (ready.isPending || ready.isError)) || corpus.isPending || corpus.isError;
   function submit(value = draft) {
     setCriteria({
       ...value,
@@ -356,7 +357,7 @@ export default function App() {
   const invalidDates =
     !!draft.date_from && !!draft.date_to && draft.date_from > draft.date_to;
   const pendingFilters =
-    !!criteria && filterKeys.some((key) => draft[key] !== criteria[key]);
+    !!criteria && (draft.mode !== criteria.mode || filterKeys.some((key) => draft[key] !== criteria[key]));
   const hasFilters = filterKeys.some((key) => draft[key] || criteria?.[key]);
   const appliedFilters = criteria
     ? filterKeys.filter((key) => criteria[key])
@@ -546,6 +547,16 @@ export default function App() {
                       La fecha inicial debe ser anterior o igual a la final.
                     </p>
                   )}
+                  <label htmlFor="search-mode">
+                    Modo de búsqueda
+                    <select id="search-mode" value={draft.mode}
+                      onChange={(e) => setDraft({ ...draft, mode: e.target.value as Criteria["mode"] })}>
+                      <option value="semantic">Semántica</option>
+                      <option value="lexical">Léxica (BM25)</option>
+                      <option value="hybrid">Híbrida</option>
+                    </select>
+                  </label>
+                  <p className="muted small">La búsqueda léxica compara palabras; no traduce entre español e inglés.</p>
                   <label htmlFor="publication-type">
                     Tipo
                     <select
@@ -692,8 +703,8 @@ export default function App() {
                   </span>
                   <h3>Empieza por una idea de investigación</h3>
                   <p>
-                    Puedes escribir en español o en inglés. Los resultados se
-                    ordenan por similitud semántica y cada publicación aparece
+                    Puedes escribir en español o en inglés. Los resultados
+                    se ordenan según el modo elegido y cada publicación aparece
                     una sola vez.
                   </p>
                   <p className="muted small">
@@ -735,7 +746,7 @@ export default function App() {
                   <div className="results-summary">
                     <p role="status">
                       {data.results.length > 0
-                        ? `${resultStart}–${resultEnd} de ${data.filtered_document_count} publicaciones`
+                        ? `${resultStart}–${resultEnd} de ${data.matched_document_count} publicaciones`
                         : "0 publicaciones"}
                     </p>
                     <p className="results-note">
@@ -839,7 +850,7 @@ export default function App() {
                         {Math.max(
                           1,
                           Math.ceil(
-                            data.filtered_document_count / data.page_size,
+                            data.matched_document_count / data.page_size,
                           ),
                         )}
                       </span>

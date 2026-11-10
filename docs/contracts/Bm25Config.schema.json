@@ -1,0 +1,43 @@
+{
+  "additionalProperties": false,
+  "properties": {
+    "model": {
+      "const": "qdrant/bm25",
+      "default": "qdrant/bm25",
+      "title": "Model",
+      "type": "string"
+    },
+    "server_version": {
+      "const": "1.20.0",
+      "default": "1.20.0",
+      "title": "Server Version",
+      "type": "string"
+    },
+    "preprocessing": {
+      "const": "word-lowercase-no-stemming-v1",
+      "default": "word-lowercase-no-stemming-v1",
+      "title": "Preprocessing",
+      "type": "string"
+    },
+    "k": {
+      "const": 1.2,
+      "default": 1.2,
+      "title": "K",
+      "type": "number"
+    },
+    "b": {
+      "const": 0.75,
+      "default": 0.75,
+      "title": "B",
+      "type": "number"
+    },
+    "avg_len": {
+      "const": 256,
+      "default": 256,
+      "title": "Avg Len",
+      "type": "integer"
+    }
+  },
+  "title": "Bm25Config",
+  "type": "object"
+}

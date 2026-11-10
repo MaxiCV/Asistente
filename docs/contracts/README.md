@@ -4,6 +4,13 @@ Fuente ejecutable: `backend/app/contracts.py`. Regenerar los archivos `*.schema.
 
 ## Corpus y procedencia
 
+SCRUM-17 añade `GenerationManifest.bm25` opcional: ausente/null conserva el modo
+semántico anterior. `SearchParams.mode` acepta `semantic`, `lexical` o `hybrid`.
+La respuesta incluye modo y `matched_document_count` para paginar coincidencias;
+`filtered_document_count` sigue contando todos los documentos que cumplen filtros.
+Léxico/híbrido en una generación sin BM25 devuelve 409 `search_mode_unavailable`.
+Ver [tokenización y compatibilidad](../implementation-scrum-17.md).
+
 `Document` contiene UUID estable, título, autores disponibles, fecha e idioma nullable, tipo/subtipo de publicación, DOI normalizado, URL original, resumen nullable y todas las identidades de OpenAlex/snapshot. `content_level=abstract` exige un resumen utilizable; `metadata` exige ausencia de resumen. Datos desconocidos se conservan como null o ND, nunca se infieren del título.
 
 `Passage` contiene UUID, documento, posición, texto, número de tokens (incluido prefijo y tokens especiales), hash y copia de los campos de filtro. Las dimensiones y el límite de tokens proceden de `EmbeddingConfig`; `ChunkingConfig` registra el método y el solapamiento. La CLI implementa ventanas por tokens con título en cada fragmento, solapamiento de 32 tokens y rechazo explícito si no puede conservar el contenido dentro del presupuesto.

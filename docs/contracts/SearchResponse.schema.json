@@ -241,6 +241,22 @@
   },
   "additionalProperties": false,
   "properties": {
+    "mode": {
+      "default": "semantic",
+      "enum": [
+        "semantic",
+        "lexical",
+        "hybrid"
+      ],
+      "title": "Mode",
+      "type": "string"
+    },
+    "matched_document_count": {
+      "default": 0,
+      "minimum": 0,
+      "title": "Matched Document Count",
+      "type": "integer"
+    },
     "index_generation": {
       "pattern": "^[a-z0-9][a-z0-9_-]{0,63}$",
       "title": "Index Generation",

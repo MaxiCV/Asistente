@@ -1,6 +1,16 @@
 {
   "additionalProperties": false,
   "properties": {
+    "mode": {
+      "default": "semantic",
+      "enum": [
+        "semantic",
+        "lexical",
+        "hybrid"
+      ],
+      "title": "Mode",
+      "type": "string"
+    },
     "q": {
       "maxLength": 300,
       "minLength": 1,

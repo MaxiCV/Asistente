@@ -6,9 +6,14 @@ from qdrant_client import models
 
 from app.catalog.generations import GenerationUnavailable
 from app.contracts import Document, RunRecord, SearchHit, SearchResponse
+from app.embeddings.bm25 import bm25_document, validate_bm25_collection
 
 
 class QueryNotEncodable(ValueError):
+    pass
+
+
+class SearchModeUnavailable(ValueError):
     pass
 
 
@@ -59,20 +64,55 @@ def get_document(client, pinned, document_id):
 
 
 def search_documents(client, pinned, encoder, params):
+    if params.mode != "semantic":
+        if pinned.manifest.bm25 is None:
+            raise SearchModeUnavailable("La generación no contiene BM25")
+        try:
+            validate_bm25_collection(client, pinned.passages_collection)
+        except ValueError as exc:
+            raise GenerationUnavailable(str(exc)) from exc
     filters = make_filter(params)
     count = client.count(pinned.documents_collection, count_filter=filters, exact=True).count
     if count > 10000:
         raise GenerationUnavailable("La colección excede el límite de paginación de esta versión")
     hits = []
+    matched_count = 0
     if count:
-        try:
-            vector = list(encoder.query_vector(params.q))
-        except ValueError as exc:
-            raise QueryNotEncodable from exc
+        query = {}
+        if params.mode != "lexical":
+            try:
+                vector = list(encoder.query_vector(params.q))
+            except ValueError as exc:
+                raise QueryNotEncodable from exc
+            query = {"query": vector, "using": "dense"}
+        if params.mode == "lexical":
+            query = {"query": bm25_document(params.q, pinned.manifest.bm25), "using": "bm25"}
+        elif params.mode == "hybrid":
+            # Recuperar todos los fragmentos del lote: no truncar grupos antes de paginar.
+            limit = pinned.manifest.passage_count
+            if limit > 10000:
+                raise GenerationUnavailable("La fusión exacta admite hasta 10000 fragmentos")
+            query = {
+                "prefetch": [
+                    models.Prefetch(
+                        query=vector,
+                        using="dense",
+                        filter=filters,
+                        limit=limit,
+                        params=models.SearchParams(exact=True),
+                    ),
+                    models.Prefetch(
+                        query=bm25_document(params.q, pinned.manifest.bm25),
+                        using="bm25",
+                        filter=filters,
+                        limit=limit,
+                    ),
+                ],
+                "query": models.FusionQuery(fusion=models.Fusion.RRF),
+            }
         groups = client.query_points_groups(
             collection_name=pinned.passages_collection,
-            query=vector,
-            using="dense",
+            **query,
             query_filter=filters,
             group_by="document_id",
             group_size=1,
@@ -81,7 +121,12 @@ def search_documents(client, pinned, encoder, params):
             with_payload=False,
             with_vectors=False,
         ).groups
-        if len(groups) != count or len({str(group.id) for group in groups}) != count:
+        matched_count = len(groups)
+        if (
+            (params.mode != "lexical" and matched_count != count)
+            or matched_count > count
+            or len({str(group.id) for group in groups}) != matched_count
+        ):
             raise GenerationUnavailable("Grupos documentales incompletos o duplicados")
         if any(not group.hits for group in groups):
             raise GenerationUnavailable("Grupo sin fragmentos")
@@ -102,11 +147,13 @@ def search_documents(client, pinned, encoder, params):
                 for group in selected
             ]
     return SearchResponse(
+        mode=params.mode,
+        matched_document_count=matched_count,
         index_generation=pinned.generation_id,
         results=hits,
         page=params.page,
         page_size=params.page_size,
-        has_more=params.page * params.page_size < count,
+        has_more=params.page * params.page_size < matched_count,
         filtered_document_count=count,
     )
 

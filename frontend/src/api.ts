@@ -27,6 +27,7 @@ export type Corpus = {
   last_run: { status: "running" | "succeeded" | "failed" } | null;
 };
 export type Criteria = {
+  mode: "semantic" | "lexical" | "hybrid";
   q: string;
   date_from: string;
   date_to: string;
@@ -38,6 +39,8 @@ export type SearchRequest = Criteria & {
   attempt: number;
 };
 export type SearchResponse = {
+  mode: Criteria["mode"];
+  matched_document_count: number;
   index_generation: string;
   results: { document: Document; score: number }[];
   page: number;
@@ -84,6 +87,7 @@ export async function request<T>(
 export function searchPath(criteria: SearchRequest) {
   const params = new URLSearchParams({
     q: criteria.q,
+    mode: criteria.mode,
     page: String(criteria.page),
     page_size: "10",
   });

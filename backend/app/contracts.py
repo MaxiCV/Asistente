@@ -245,6 +245,15 @@ class SnapshotManifest(Contract):
         return self
 
 
+class Bm25Config(Contract):
+    model: Literal["qdrant/bm25"] = "qdrant/bm25"
+    server_version: Literal["1.20.0"] = "1.20.0"
+    preprocessing: Literal["word-lowercase-no-stemming-v1"] = "word-lowercase-no-stemming-v1"
+    k: Literal[1.2] = 1.2
+    b: Literal[0.75] = 0.75
+    avg_len: Literal[256] = 256
+
+
 class GenerationManifest(Contract):
     schema_version: Literal[1] = 1
     generation_id: GenerationId
@@ -258,6 +267,7 @@ class GenerationManifest(Contract):
     config_sha256: Sha256
     embedding: EmbeddingConfig
     chunking: ChunkingConfig
+    bm25: Bm25Config | None = None
     document_count: int = Field(ge=0)
     passage_count: int = Field(ge=0)
     abstract_count: int = Field(ge=0)
@@ -279,6 +289,7 @@ class GenerationManifest(Contract):
 
 
 class SearchParams(Contract):
+    mode: Literal["semantic", "lexical", "hybrid"] = "semantic"
     q: Annotated[str, StringConstraints(strip_whitespace=True, min_length=1, max_length=300)]
     page: int = Field(default=1, ge=1)
     page_size: int = Field(default=20, ge=1, le=100)
@@ -307,6 +318,8 @@ class SearchHit(Contract):
 
 
 class SearchResponse(Contract):
+    mode: Literal["semantic", "lexical", "hybrid"] = "semantic"
+    matched_document_count: int = Field(default=0, ge=0)
     index_generation: GenerationId
     results: list[SearchHit]
     page: int = Field(ge=1)

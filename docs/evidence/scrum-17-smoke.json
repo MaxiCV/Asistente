@@ -1,0 +1,97 @@
+{
+  "generation": "s17_20261110_bm25",
+  "published": false,
+  "quality_evaluated": false,
+  "aliases": {
+    "aliases": [
+      {
+        "alias_name": "documents",
+        "collection_name": "documents_s13_20261105_v2"
+      },
+      {
+        "alias_name": "passages",
+        "collection_name": "passages_s13_20261105_v2"
+      }
+    ]
+  },
+  "results": [
+    {
+      "query": "fall detection at home",
+      "mode": "semantic",
+      "filtered": 100,
+      "matched": 100,
+      "first_ids": [
+        "d4038962-09b8-5e1a-a8e7-e4e55920409b",
+        "61b4146c-74e7-5976-a16e-33f8ea208f9d",
+        "1aa803e2-3175-574f-bd35-99a732dec1b8",
+        "03aa7825-ab2b-5878-84f3-0648a78af2b7",
+        "119a465d-f0eb-5d25-ba08-9eccde37c727"
+      ]
+    },
+    {
+      "query": "fall detection at home",
+      "mode": "lexical",
+      "filtered": 100,
+      "matched": 95,
+      "first_ids": [
+        "2a9b7fc5-3bc8-559d-93f7-7d99f5b27d95",
+        "4065f237-c46a-513f-b4b5-f97e60fa21a0",
+        "1957172a-cfab-5949-8b09-10b55ebd0d59",
+        "31b66458-e67c-5021-84b1-a2e7796113bd",
+        "dbf237a2-7452-594c-9e51-9c0a886a3397"
+      ]
+    },
+    {
+      "query": "fall detection at home",
+      "mode": "hybrid",
+      "filtered": 100,
+      "matched": 100,
+      "first_ids": [
+        "d4038962-09b8-5e1a-a8e7-e4e55920409b",
+        "2a9b7fc5-3bc8-559d-93f7-7d99f5b27d95",
+        "722c8dea-4fee-52c6-8728-08eb7166567e",
+        "61b4146c-74e7-5976-a16e-33f8ea208f9d",
+        "4065f237-c46a-513f-b4b5-f97e60fa21a0"
+      ]
+    },
+    {
+      "query": "detección de caídas en casa",
+      "mode": "semantic",
+      "filtered": 100,
+      "matched": 100,
+      "first_ids": [
+        "2c880870-11c5-5b0e-8ac3-ca1f54db4e42",
+        "722c8dea-4fee-52c6-8728-08eb7166567e",
+        "092317aa-0abf-503a-83c8-d3e8f1182df1",
+        "3a51d217-275e-5263-a273-6a3f8ec90460",
+        "7d2d0cde-25a8-59d2-84ec-f6196f77ae12"
+      ]
+    },
+    {
+      "query": "detección de caídas en casa",
+      "mode": "lexical",
+      "filtered": 100,
+      "matched": 8,
+      "first_ids": [
+        "2c880870-11c5-5b0e-8ac3-ca1f54db4e42",
+        "36e08040-9f59-5b33-a985-1eb7429d7dc5",
+        "722c8dea-4fee-52c6-8728-08eb7166567e",
+        "7d2d0cde-25a8-59d2-84ec-f6196f77ae12",
+        "d6bc8a89-c84b-5cae-a90a-b07b6141db2a"
+      ]
+    },
+    {
+      "query": "detección de caídas en casa",
+      "mode": "hybrid",
+      "filtered": 100,
+      "matched": 100,
+      "first_ids": [
+        "2c880870-11c5-5b0e-8ac3-ca1f54db4e42",
+        "722c8dea-4fee-52c6-8728-08eb7166567e",
+        "6a284df8-d190-558d-a3c1-1702c754c027",
+        "36e08040-9f59-5b33-a985-1eb7429d7dc5",
+        "092317aa-0abf-503a-83c8-d3e8f1182df1"
+      ]
+    }
+  ]
+}

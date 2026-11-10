@@ -45,6 +45,7 @@ def main() -> int:
     normalize.add_argument("--csv", type=Path)
     build = commands.add_parser("build", help="Construir una generación nueva desde snapshot y CSV")
     build.add_argument("generation")
+    build.add_argument("--bm25", action="store_true", help="Añadir BM25 nativo e IDF")
     build.add_argument("--snapshot", type=Path, required=True)
     build.add_argument("--csv", type=Path, default=ROOT / "corpus/revision_corpus.csv")
     for command in ("publish", "rollback"):
@@ -128,12 +129,20 @@ def main() -> int:
 
             _, result = select_documents(args.snapshot, args.csv)
         elif args.command == "build":
+            from app.contracts import Bm25Config
             from app.embeddings.local import LocalEncoder
             from app.indexing.build import build_generation
 
             with qdrant_connection(settings.qdrant_url, timeout=60) as client:
                 result = build_generation(
-                    client, settings, config, args.generation, args.snapshot, args.csv, LocalEncoder
+                    client,
+                    settings,
+                    config,
+                    args.generation,
+                    args.snapshot,
+                    args.csv,
+                    LocalEncoder,
+                    bm25=Bm25Config() if args.bm25 else None,
                 )
         elif args.command in ("publish", "rollback"):
             from app.indexing.publish import publish_generation
