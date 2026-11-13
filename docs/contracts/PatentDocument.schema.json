@@ -114,6 +114,22 @@
       "format": "date-time",
       "title": "Retrieved At",
       "type": "string"
+    },
+    "inventors": {
+      "items": {
+        "minLength": 1,
+        "type": "string"
+      },
+      "title": "Inventors",
+      "type": "array"
+    },
+    "applicants": {
+      "items": {
+        "minLength": 1,
+        "type": "string"
+      },
+      "title": "Applicants",
+      "type": "array"
     }
   },
   "required": [

@@ -45,6 +45,7 @@ def main() -> int:
     normalize.add_argument("--csv", type=Path)
     build = commands.add_parser("build", help="Construir una generación nueva desde snapshot y CSV")
     build.add_argument("generation")
+    build.add_argument("--patent-selection", type=Path, help="Selección revisada de patentes OPS")
     build.add_argument("--bm25", action="store_true", help="Añadir BM25 nativo e IDF")
     build.add_argument("--snapshot", type=Path, required=True)
     build.add_argument("--csv", type=Path, default=ROOT / "corpus/revision_corpus.csv")
@@ -143,6 +144,7 @@ def main() -> int:
                     args.csv,
                     LocalEncoder,
                     bm25=Bm25Config() if args.bm25 else None,
+                    patent_selection=args.patent_selection,
                 )
         elif args.command in ("publish", "rollback"):
             from app.indexing.publish import publish_generation

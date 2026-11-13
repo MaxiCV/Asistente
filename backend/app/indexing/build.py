@@ -11,7 +11,7 @@ from qdrant_client import models
 
 from app.catalog.generations import collection_names, create_candidate_collections
 from app.contracts import ChunkingConfig, Document, GenerationManifest, Passage, RunRecord
-from app.core.files import atomic_json
+from app.core.files import atomic_json, sha256_file
 from app.embeddings.bm25 import bm25_document, check_bm25_server, validate_bm25_collection
 from app.indexing.chunking import make_passages
 from app.ingestion.normalize import select_documents
@@ -121,7 +121,16 @@ def validate_collections(client, manifest, documents=None, passages=None):
 
 
 def build_generation(
-    client, settings, embedding, generation, snapshot, csv_path, encoder_factory, *, bm25=None
+    client,
+    settings,
+    embedding,
+    generation,
+    snapshot,
+    csv_path,
+    encoder_factory,
+    *,
+    bm25=None,
+    patent_selection=None,
 ):
     if bm25:
         check_bm25_server(client, bm25)
@@ -142,6 +151,12 @@ def build_generation(
         atomic_json(run_path, run.model_dump(mode="json"))
         try:
             documents, selection = select_documents(snapshot, csv_path)
+            if patent_selection:
+                from app.ingestion.patent_corpus import select_patents
+
+                documents += select_patents(settings.data_dir, patent_selection)
+                (target / "patent_selection.json").write_bytes(patent_selection.read_bytes())
+                selection["abstract_count"] = sum(d.abstract is not None for d in documents)
             run.snapshot_id = selection["snapshot_id"]
             chunking = ChunkingConfig()
             config = {
@@ -204,6 +219,9 @@ def build_generation(
                 embedding=embedding,
                 chunking=chunking,
                 bm25=bm25,
+                patent_selection_sha256=sha256_file(target / "patent_selection.json")
+                if patent_selection
+                else None,
                 document_count=len(documents),
                 passage_count=len(passages),
                 abstract_count=selection["abstract_count"],

@@ -4,6 +4,12 @@ Fuente ejecutable: `backend/app/contracts.py`. Regenerar los archivos `*.schema.
 
 ## Corpus y procedencia
 
+Desde la integración del 12-11-2026, `Document` y `Passage` admiten `patent`.
+La procedencia de patentes usa `PatentSourceIdentity` con identificador DOCDB,
+snapshot, fecha y solicitantes; `authors` contiene los inventores disponibles.
+La API permite `document_type=all|publication|patent`, conservando `publication`
+como valor predeterminado. La UI consulta ambos tipos inicialmente.
+
 SCRUM-17 añade `GenerationManifest.bm25` opcional: ausente/null conserva el modo
 semántico anterior. `SearchParams.mode` acepta `semantic`, `lexical` o `hybrid`.
 La respuesta incluye modo y `matched_document_count` para paginar coincidencias;

@@ -57,8 +57,12 @@
       "title": "Date To"
     },
     "document_type": {
-      "const": "publication",
       "default": "publication",
+      "enum": [
+        "publication",
+        "patent",
+        "all"
+      ],
       "title": "Document Type",
       "type": "string"
     },

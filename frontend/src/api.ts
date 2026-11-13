@@ -1,4 +1,5 @@
 export type Document = {
+  document_type: "publication" | "patent";
   document_id: string;
   title: string;
   authors: { name: string }[];
@@ -12,7 +13,9 @@ export type Document = {
   technology: string;
   evidence: string;
   identities: {
-    openalex_id: string;
+    openalex_id?: string;
+    publication_id?: string;
+    applicants?: string[];
     snapshot_id: string;
     retrieved_at: string;
   }[];
@@ -27,6 +30,7 @@ export type Corpus = {
   last_run: { status: "running" | "succeeded" | "failed" } | null;
 };
 export type Criteria = {
+  document_type: "publication" | "patent" | "all";
   mode: "semantic" | "lexical" | "hybrid";
   q: string;
   date_from: string;
@@ -88,6 +92,7 @@ export function searchPath(criteria: SearchRequest) {
   const params = new URLSearchParams({
     q: criteria.q,
     mode: criteria.mode,
+    document_type: criteria.document_type,
     page: String(criteria.page),
     page_size: "10",
   });
@@ -104,6 +109,7 @@ export function searchPath(criteria: SearchRequest) {
 export const typeLabel = (value: string | null) =>
   ({
     article: "Artículo",
+    patent: "Patente / solicitud",
     "conference-paper": "Ponencia de congreso",
     other: "Otra publicación",
     review: "Revisión",

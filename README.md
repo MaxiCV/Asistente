@@ -1,5 +1,11 @@
 # Asistente de revisión de literatura
 
+**Actualización 12-11-2026:** la colección local activa `s17_20261112_patents`
+contiene 100 publicaciones científicas y seis patentes/solicitudes, incluida la
+de Óscar Rojas/USACH sobre consultas WAND. Búsqueda semántica, léxica e híbrida
+disponibles. [Selección y comprobaciones](docs/patent-corpus-2026-11-12.md).
+El párrafo siguiente conserva el estado del hito anterior.
+
 Buscador local para investigar detección de caídas en el hogar mediante ML/DL. Al **8 de noviembre de 2026** están implementados y finalizados en Jira **SCRUM-10 a SCRUM-14**, incluida la base de indexación de SCRUM-26. La web permite buscar en español e inglés, filtrar por fecha y tipo, leer fichas y copiar referencias. La colección publicada tiene 100 documentos únicos, 90 con resumen y 103 fragmentos. El piloto conserva 20 documentos, con 18 resúmenes. También están implementados el respaldo y la restauración de la generación activa. El retiro controlado de generaciones (SCRUM-26) y la aceptación del hito (SCRUM-15) siguen pendientes.
 
 [Revisión documental y comprobaciones del 8 de noviembre](docs/revision-documentacion-2026-11-08.md). Los registros de cada incremento conservan sus cifras y fechas originales.
@@ -85,6 +91,7 @@ Crear colecciones no publica datos ni cambia los alias. La CLI construye nuevas 
 - [Pruebas y recuperación de SCRUM-14](docs/implementation-scrum-14.md).
 - [Conector de patentes EPO OPS: primer incremento de SCRUM-16](docs/implementation-scrum-16.md).
 - [BM25, modos y generaciones híbridas de SCRUM-17](docs/implementation-scrum-17.md).
+- [Patentes reales y caso Óscar Rojas/USACH](docs/patent-corpus-2026-11-12.md).
 - [Guion de demo y comandos de respaldo/restauración](docs/demo-local.md).
 
 ## Captura y selección del corpus

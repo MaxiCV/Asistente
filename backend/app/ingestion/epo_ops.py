@@ -31,6 +31,18 @@ def _localized(nodes):
     return None
 
 
+def _names(bibliography, role):
+    for format_name in ("original", "epodoc"):
+        nodes = bibliography.findall(
+            f"ex:parties/ex:{role}s/ex:{role}[@data-format='{format_name}']/ex:{role}-name/ex:name",
+            NS,
+        )
+        names = list(dict.fromkeys(_text(node) for node in nodes if _text(node)))
+        if names:
+            return names
+    return []
+
+
 def parse_page(content: bytes, snapshot_id: str, retrieved_at: datetime):
     """XML UTF-8 de OPS. No se admiten DTD ni entidades definidas por terceros."""
     try:
@@ -83,6 +95,8 @@ def parse_page(content: bytes, snapshot_id: str, retrieved_at: datetime):
                     f"docdb/{publication_id}/biblio",
                     snapshot_id=snapshot_id,
                     retrieved_at=retrieved_at,
+                    inventors=_names(bibliography, "inventor"),
+                    applicants=_names(bibliography, "applicant"),
                 )
             )
         return total, documents

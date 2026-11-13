@@ -41,6 +41,47 @@
       "title": "Evidence",
       "type": "string"
     },
+    "PatentSourceIdentity": {
+      "additionalProperties": false,
+      "properties": {
+        "source": {
+          "const": "epo_ops",
+          "default": "epo_ops",
+          "title": "Source",
+          "type": "string"
+        },
+        "publication_id": {
+          "pattern": "^[A-Z]{2}\\.[A-Z0-9]+\\.[A-Z][0-9]?$",
+          "title": "Publication Id",
+          "type": "string"
+        },
+        "snapshot_id": {
+          "pattern": "^[a-z0-9][a-z0-9_-]{0,63}$",
+          "title": "Snapshot Id",
+          "type": "string"
+        },
+        "retrieved_at": {
+          "format": "date-time",
+          "title": "Retrieved At",
+          "type": "string"
+        },
+        "applicants": {
+          "items": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "title": "Applicants",
+          "type": "array"
+        }
+      },
+      "required": [
+        "publication_id",
+        "snapshot_id",
+        "retrieved_at"
+      ],
+      "title": "PatentSourceIdentity",
+      "type": "object"
+    },
     "SourceIdentity": {
       "additionalProperties": false,
       "properties": {
@@ -94,8 +135,11 @@
       "type": "string"
     },
     "document_type": {
-      "const": "publication",
       "default": "publication",
+      "enum": [
+        "publication",
+        "patent"
+      ],
       "title": "Document Type",
       "type": "string"
     },
@@ -195,7 +239,14 @@
     },
     "identities": {
       "items": {
-        "$ref": "#/$defs/SourceIdentity"
+        "anyOf": [
+          {
+            "$ref": "#/$defs/SourceIdentity"
+          },
+          {
+            "$ref": "#/$defs/PatentSourceIdentity"
+          }
+        ]
       },
       "minItems": 1,
       "title": "Identities",

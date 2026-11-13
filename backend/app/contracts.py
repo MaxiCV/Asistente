@@ -83,6 +83,14 @@ class Author(Contract):
     orcid: HttpUrl | None = None
 
 
+class PatentSourceIdentity(Contract):
+    source: Literal["epo_ops"] = "epo_ops"
+    publication_id: Annotated[str, StringConstraints(pattern=r"^[A-Z]{2}\.[A-Z0-9]+\.[A-Z][0-9]?$")]
+    snapshot_id: GenerationId
+    retrieved_at: AwareDatetime
+    applicants: list[Text] = Field(default_factory=list)
+
+
 class PatentDocument(Contract):
     """Registro de captura OPS; aún no forma parte del índice de publicaciones."""
 
@@ -99,6 +107,8 @@ class PatentDocument(Contract):
     source_url: HttpUrl
     snapshot_id: GenerationId
     retrieved_at: AwareDatetime
+    inventors: list[Text] = Field(default_factory=list)
+    applicants: list[Text] = Field(default_factory=list)
 
     @model_validator(mode="after")
     def content_available(self):
@@ -121,7 +131,7 @@ class PatentFetchConfig(Contract):
 class Document(Contract):
     schema_version: Literal[1] = 1
     document_id: UUID
-    document_type: Literal["publication"] = "publication"
+    document_type: Literal["publication", "patent"] = "publication"
     publication_type: Text | None = None
     title: Text
     authors: list[Author] = Field(default_factory=list)
@@ -131,7 +141,7 @@ class Document(Contract):
     source_url: HttpUrl
     abstract: Text | None = None
     content_level: Literal["metadata", "abstract"]
-    identities: list[SourceIdentity] = Field(min_length=1)
+    identities: list[SourceIdentity | PatentSourceIdentity] = Field(min_length=1)
     technology: Technology = Technology.UNKNOWN
     evidence: Evidence = Evidence.UNKNOWN
 
@@ -139,7 +149,13 @@ class Document(Contract):
     def content_and_identity(self):
         if (self.content_level == "abstract") != (self.abstract is not None):
             raise ValueError("content_level debe reflejar el resumen disponible")
-        keys = [(x.snapshot_id, x.openalex_id) for x in self.identities]
+        expected = PatentSourceIdentity if self.document_type == "patent" else SourceIdentity
+        if any(not isinstance(x, expected) for x in self.identities):
+            raise ValueError("Procedencia incompatible con tipo documental")
+        keys = [
+            (x.snapshot_id, x.openalex_id if isinstance(x, SourceIdentity) else x.publication_id)
+            for x in self.identities
+        ]
         if len(keys) != len(set(keys)):
             raise ValueError("Identidades de origen repetidas")
         return self
@@ -154,7 +170,7 @@ class Passage(Contract):
     token_count: int = Field(gt=0)
     text_sha256: Sha256
     publication_date: date | None = None
-    document_type: Literal["publication"] = "publication"
+    document_type: Literal["publication", "patent"] = "publication"
     publication_type: Text | None = None
 
 
@@ -268,6 +284,7 @@ class GenerationManifest(Contract):
     embedding: EmbeddingConfig
     chunking: ChunkingConfig
     bm25: Bm25Config | None = None
+    patent_selection_sha256: Sha256 | None = None
     document_count: int = Field(ge=0)
     passage_count: int = Field(ge=0)
     abstract_count: int = Field(ge=0)
@@ -295,7 +312,7 @@ class SearchParams(Contract):
     page_size: int = Field(default=20, ge=1, le=100)
     date_from: date | None = None
     date_to: date | None = None
-    document_type: Literal["publication"] = "publication"
+    document_type: Literal["publication", "patent", "all"] = "publication"
     publication_type: Text | None = None
     index_generation: GenerationId | None = None
 

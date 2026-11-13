@@ -1,6 +1,6 @@
 from pathlib import Path
 
-from pydantic import Field, SecretStr, field_validator
+from pydantic import AliasChoices, Field, SecretStr, field_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 from app.contracts import EmbeddingConfig
@@ -18,8 +18,13 @@ class Settings(BaseSettings):
     qdrant_url: str = "http://127.0.0.1:6333"
     data_dir: Path = Field(default=ROOT / "data", validation_alias="ASISTENTE_DATA_DIR")
     openalex_api_key: SecretStr | None = None
-    epo_ops_consumer_key: SecretStr | None = None
-    epo_ops_consumer_secret: SecretStr | None = None
+    epo_ops_consumer_key: SecretStr | None = Field(
+        default=None, validation_alias=AliasChoices("epo_ops_consumer_key", "EPO_CONSUMER_KEY")
+    )
+    epo_ops_consumer_secret: SecretStr | None = Field(
+        default=None,
+        validation_alias=AliasChoices("epo_ops_consumer_secret", "EPO_CONSUMER_SECRET"),
+    )
     embedding_device: str = "cpu"
     embedding_threads: int = Field(default=4, ge=1, le=32)
 

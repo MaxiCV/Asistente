@@ -69,6 +69,21 @@ def backup(client, settings, config, destination: Path, review_csv: Path):
                 copy(folder / filename, f"data/generations/{pinned.generation_id}/{filename}")
         for filename in ("manifest.json", "works.jsonl", "requests.jsonl", "quarantine.jsonl"):
             copy(snapshot / filename, f"data/snapshots/{manifest.snapshot_id}/{filename}")
+        if manifest.patent_selection_sha256:
+            from app.ingestion.patent_corpus import PatentSelectionFile, select_patents
+
+            selection = folder / "patent_selection.json"
+            if sha256_file(selection) != manifest.patent_selection_sha256:
+                raise ValueError("Selección de patentes alterada")
+            select_patents(settings.data_dir, selection)
+            copy(selection, f"data/generations/{pinned.generation_id}/patent_selection.json")
+            rows = PatentSelectionFile.model_validate_json(selection.read_text("utf-8"))
+            for snapshot_id in sorted({r.snapshot_id for r in rows.records}):
+                relative = f"data/patents/snapshots/{snapshot_id}"
+                patent_dir = settings.data_dir / "patents/snapshots" / snapshot_id
+                pm = json.loads((patent_dir / "manifest.json").read_text("utf-8"))
+                for filename in ["manifest.json", *pm["files"]]:
+                    copy(patent_dir / filename, f"{relative}/{filename}")
         for filename in [*MODEL_FILES, "download.json"]:
             if (model / filename).is_file():
                 copy(
@@ -164,6 +179,21 @@ def verify_backup(source: Path):
         raise ValueError("Snapshot de respaldo incompatible")
     if sha256_file(source / "corpus/revision_corpus.csv") != manifest.review_csv_sha256:
         raise ValueError("CSV de respaldo incompatible")
+    if manifest.patent_selection_sha256:
+        from app.ingestion.patent_corpus import PatentSelectionFile, select_patents
+
+        selection = source / "data/generations" / manifest.generation_id / "patent_selection.json"
+        if sha256_file(selection) != manifest.patent_selection_sha256:
+            raise ValueError("Selección de patentes incompatible")
+        select_patents(source / "data", selection)
+        rows = PatentSelectionFile.model_validate_json(selection.read_text("utf-8"))
+        required.add(f"data/generations/{manifest.generation_id}/patent_selection.json")
+        for snapshot_id in {r.snapshot_id for r in rows.records}:
+            relative = f"data/patents/snapshots/{snapshot_id}"
+            pm = json.loads((source / relative / "manifest.json").read_text("utf-8"))
+            required.update(f"{relative}/{name}" for name in ["manifest.json", *pm["files"]])
+        if not required.issubset(record["files"]):
+            raise ValueError("Respaldo de patentes incompleto")
     return record, manifest
 
 

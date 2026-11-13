@@ -1,5 +1,8 @@
 # SCRUM-17 · BM25 y búsqueda híbrida
 
+**Actualización 12-11-2026:** incorporada selección real de patentes, incluido el caso
+de Óscar Rojas/USACH. Ver [registro de integración](patent-corpus-2026-11-12.md).
+
 Implementación del 10 de noviembre de 2026 sobre el incremento SCRUM-16.
 
 ## Comportamiento

@@ -30,6 +30,7 @@ import type {
 } from "./api";
 
 const initial: Criteria = {
+  document_type: "all",
   mode: "semantic",
   q: "",
   date_from: "",
@@ -250,18 +251,19 @@ function Detail({
               </p>
               <ul className="provenance">
                 {document.identities.map((identity) => (
-                  <li key={`${identity.snapshot_id}-${identity.openalex_id}`}>
+                  <li key={`${identity.snapshot_id}-${identity.openalex_id ?? identity.publication_id}`}>
                     <a
-                      href={identity.openalex_id}
+                      href={identity.openalex_id ?? document.source_url}
                       target="_blank"
                       rel="noreferrer"
                     >
-                      {identity.openalex_id}
+                      {identity.openalex_id ?? `EPO OPS · ${identity.publication_id}`}
                     </a>
                     <span>
                       Capturado el {dateLabel(identity.retrieved_at)} · Lote{" "}
                       {identity.snapshot_id}
                     </span>
+                    {identity.applicants?.length ? <span>Solicitante: {identity.applicants.join(", ")}</span> : null}
                   </li>
                 ))}
               </ul>
@@ -357,7 +359,7 @@ export default function App() {
   const invalidDates =
     !!draft.date_from && !!draft.date_to && draft.date_from > draft.date_to;
   const pendingFilters =
-    !!criteria && (draft.mode !== criteria.mode || filterKeys.some((key) => draft[key] !== criteria[key]));
+    !!criteria && (draft.mode !== criteria.mode || draft.document_type !== criteria.document_type || filterKeys.some((key) => draft[key] !== criteria[key]));
   const hasFilters = filterKeys.some((key) => draft[key] || criteria?.[key]);
   const appliedFilters = criteria
     ? filterKeys.filter((key) => criteria[key])
@@ -547,6 +549,15 @@ export default function App() {
                       La fecha inicial debe ser anterior o igual a la final.
                     </p>
                   )}
+                  <label htmlFor="document-type">
+                    Documentos
+                    <select id="document-type" value={draft.document_type}
+                      onChange={(e) => setDraft({ ...draft, document_type: e.target.value as Criteria["document_type"] })}>
+                      <option value="all">Publicaciones y patentes</option>
+                      <option value="publication">Publicaciones científicas</option>
+                      <option value="patent">Patentes y solicitudes</option>
+                    </select>
+                  </label>
                   <label htmlFor="search-mode">
                     Modo de búsqueda
                     <select id="search-mode" value={draft.mode}
@@ -746,7 +757,7 @@ export default function App() {
                   <div className="results-summary">
                     <p role="status">
                       {data.results.length > 0
-                        ? `${resultStart}–${resultEnd} de ${data.matched_document_count} publicaciones`
+                        ? `${resultStart}–${resultEnd} de ${data.matched_document_count} documentos`
                         : "0 publicaciones"}
                     </p>
                     <p className="results-note">

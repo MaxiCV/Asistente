@@ -18,12 +18,16 @@ class SearchModeUnavailable(ValueError):
 
 
 def make_filter(params):
-    conditions = [
-        models.FieldCondition(
-            key="document_type",
-            match=models.MatchValue(value=params.document_type),
-        )
-    ]
+    conditions = (
+        []
+        if params.document_type == "all"
+        else [
+            models.FieldCondition(
+                key="document_type",
+                match=models.MatchValue(value=params.document_type),
+            )
+        ]
+    )
     if params.publication_type:
         conditions.append(
             models.FieldCondition(

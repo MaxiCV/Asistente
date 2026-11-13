@@ -1,5 +1,9 @@
 # SCRUM-16 · Conector de patentes, primer incremento
 
+**Actualización 12-11-2026:** acceso real validado, seis patentes/solicitudes seleccionadas
+e integración con el buscador. Ver [captura y selección](patent-corpus-2026-11-12.md).
+El resto de este documento conserva el registro del primer incremento del 10-11.
+
 Implementación iniciada el 10 de noviembre de 2026 en `feat/scrum-16-epo-ops`.
 No se declara terminado el ticket: falta una captura autenticada real, revisión de
 su contenido y condiciones de uso, y revisión/integración del código.
