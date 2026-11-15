@@ -302,6 +302,8 @@ class GenerationManifest(Contract):
             raise ValueError("Conteos de generación incoherentes")
         if self.chunking.max_tokens > self.embedding.max_tokens:
             raise ValueError("Fragmentación excede el presupuesto del modelo")
+        if ("patent" in self.publication_types) != (self.patent_selection_sha256 is not None):
+            raise ValueError("Patentes y selección de procedencia incoherentes")
         return self
 
 

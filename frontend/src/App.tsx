@@ -56,8 +56,10 @@ const evidence: Record<string, string> = {
   ND: "No determinada",
 };
 
-const filterKeys = ["date_from", "date_to", "publication_type"] as const;
+const filterKeys = ["date_from", "date_to", "publication_type", "document_type"] as const;
 type FilterKey = (typeof filterKeys)[number];
+const filterActive = (value: Criteria | null, key: FilterKey) =>
+  !!value && (key === "document_type" ? value[key] !== "all" : !!value[key]);
 
 function Icon({ name }: { name: "search" | "arrow" | "close" | "book" }) {
   const paths = {
@@ -345,7 +347,11 @@ export default function App() {
     resultsHeading.current?.focus();
   }
   function restart() {
-    if (criteria) submit(criteria);
+    const mode = search.error instanceof ApiError && search.error.code === "search_mode_unavailable"
+      ? "semantic" : draft.mode;
+    const value = { ...draft, mode };
+    setDraft(value);
+    if (criteria) submit(value);
   }
   function changePage(page: number) {
     if (criteria && data)
@@ -360,19 +366,20 @@ export default function App() {
     !!draft.date_from && !!draft.date_to && draft.date_from > draft.date_to;
   const pendingFilters =
     !!criteria && (draft.mode !== criteria.mode || draft.document_type !== criteria.document_type || filterKeys.some((key) => draft[key] !== criteria[key]));
-  const hasFilters = filterKeys.some((key) => draft[key] || criteria?.[key]);
+  const hasFilters = filterKeys.some((key) => filterActive(draft, key) || filterActive(criteria, key));
   const appliedFilters = criteria
-    ? filterKeys.filter((key) => criteria[key])
+    ? filterKeys.filter((key) => filterActive(criteria, key))
     : [];
   function clearFilters(key?: FilterKey) {
-    const reset = key
-      ? { [key]: "" }
-      : { date_from: "", date_to: "", publication_type: "" };
+    const reset: Partial<Criteria> = key
+      ? { [key]: key === "document_type" ? "all" : "" }
+      : { date_from: "", date_to: "", publication_type: "", document_type: "all" };
     setDraft((current) => ({ ...current, ...reset }));
     if (criteria) submit({ ...criteria, ...reset });
   }
   function filterLabel(key: FilterKey) {
     if (!criteria) return "";
+    if (key === "document_type") return criteria[key] === "patent" ? "Patentes y solicitudes" : "Publicaciones científicas";
     return key === "publication_type"
       ? typeLabel(criteria[key])
       : `${key === "date_from" ? "Desde" : "Hasta"} ${dateLabel(criteria[key])}`;
@@ -552,7 +559,7 @@ export default function App() {
                   <label htmlFor="document-type">
                     Documentos
                     <select id="document-type" value={draft.document_type}
-                      onChange={(e) => setDraft({ ...draft, document_type: e.target.value as Criteria["document_type"] })}>
+                      onChange={(e) => setDraft({ ...draft, document_type: e.target.value as Criteria["document_type"], publication_type: "" })}>
                       <option value="all">Publicaciones y patentes</option>
                       <option value="publication">Publicaciones científicas</option>
                       <option value="patent">Patentes y solicitudes</option>
@@ -563,8 +570,8 @@ export default function App() {
                     <select id="search-mode" value={draft.mode}
                       onChange={(e) => setDraft({ ...draft, mode: e.target.value as Criteria["mode"] })}>
                       <option value="semantic">Semántica</option>
-                      <option value="lexical">Léxica (BM25)</option>
-                      <option value="hybrid">Híbrida</option>
+                      <option value="lexical" disabled={!active?.manifest?.bm25}>Léxica (BM25)</option>
+                      <option value="hybrid" disabled={!active?.manifest?.bm25}>Híbrida</option>
                     </select>
                   </label>
                   <p className="muted small">La búsqueda léxica compara palabras; no traduce entre español e inglés.</p>
@@ -577,8 +584,8 @@ export default function App() {
                         setDraft({ ...draft, publication_type: e.target.value })
                       }
                     >
-                      <option value="">Todas las publicaciones</option>
-                      {active?.publication_types.map((type) => (
+                      <option value="">Todos los tipos</option>
+                      {active?.publication_types.filter((type) => draft.document_type === "all" || (draft.document_type === "patent" ? type === "patent" : type !== "patent")).map((type) => (
                         <option key={type} value={type}>
                           {typeLabel(type)}
                         </option>
@@ -758,7 +765,7 @@ export default function App() {
                     <p role="status">
                       {data.results.length > 0
                         ? `${resultStart}–${resultEnd} de ${data.matched_document_count} documentos`
-                        : "0 publicaciones"}
+                        : "0 documentos"}
                     </p>
                     <p className="results-note">
                       Ordenadas por similitud con tu consulta; esto no garantiza
@@ -767,10 +774,11 @@ export default function App() {
                   </div>
                   {data.results.length === 0 ? (
                     <div className="welcome">
-                      <h3>No hay publicaciones para estos filtros</h3>
+                      <h3>{data.filtered_document_count === 0 ? "No hay documentos para estos filtros" : "No hay coincidencias para estos términos"}</h3>
                       <p>
-                        Amplía el intervalo de fechas o selecciona todos los
-                        tipos de publicación y vuelve a buscar.
+                        {data.filtered_document_count === 0
+                          ? "Amplía el intervalo de fechas o selecciona todos los tipos de documento y vuelve a buscar."
+                          : "Prueba otros términos o cambia al modo semántico o híbrido. La búsqueda léxica no traduce la consulta."}
                       </p>
                       {appliedFilters.length > 0 && (
                         <Button

@@ -16,7 +16,14 @@ from app.main import create_app
 from app.search.service import SearchModeUnavailable, search_documents
 from fastapi.testclient import TestClient
 from qdrant_client import QdrantClient, models
-from test_search_flow import Encoder, ScopedClient, documents
+from test_search_flow import Encoder, ScopedClient, documents, indexed  # noqa: F401
+
+
+@pytest.mark.parametrize("mode", ["lexical", "hybrid"])
+def test_api_rejects_unsupported_mode(indexed, mode):  # noqa: F811
+    response = indexed.api.get("/api/v1/documents", params={"q": "fall", "mode": mode})
+    assert response.status_code == 409
+    assert response.json()["detail"]["code"] == "search_mode_unavailable"
 
 
 def test_old_generation_rejects_unsupported_modes():

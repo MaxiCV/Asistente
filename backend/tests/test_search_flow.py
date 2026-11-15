@@ -141,10 +141,19 @@ def indexed(request, tmp_path, monkeypatch):
     )
     generations = []
 
-    def build(encoder=Encoder):
+    def build(encoder=Encoder, *, patent_selection=None):
         generation = f"test_s13_{uuid4().hex}"
         generations.append(generation)
-        build_generation(client, settings, embedding_config(), generation, None, None, encoder)
+        build_generation(
+            client,
+            settings,
+            embedding_config(),
+            generation,
+            None,
+            None,
+            encoder,
+            patent_selection=patent_selection,
+        )
         return generation
 
     generation = build()

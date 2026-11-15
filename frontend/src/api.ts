@@ -21,6 +21,7 @@ export type Document = {
   }[];
 };
 export type Corpus = {
+  manifest: { bm25: unknown | null } | null;
   index_generation: string;
   document_count: number;
   abstract_count: number;
@@ -56,6 +57,7 @@ export class ApiError extends Error {
   constructor(
     public status: number,
     message: string,
+    public code?: string,
   ) {
     super(message);
   }
@@ -85,6 +87,7 @@ export async function request<T>(
       typeof data.detail?.message === "string"
         ? data.detail.message
         : "No se pudo completar la consulta. Revisa los filtros e inténtalo otra vez.",
+      typeof data.detail?.code === "string" ? data.detail.code : undefined,
     );
   return data as T;
 }

@@ -14,7 +14,7 @@ from app.contracts import EmbeddingConfig
 from app.core.config import ROOT, Settings
 from app.core.files import atomic_json, sha256_file
 from app.embeddings.local import MODEL_FILES, verify_model_files
-from app.indexing.build import validate_collections, writer_lock
+from app.indexing.build import validate_collections, validate_patent_provenance, writer_lock
 from app.ingestion.snapshot import read_snapshot
 
 
@@ -47,6 +47,7 @@ def backup(client, settings, config, destination: Path, review_csv: Path):
         if client.info().version != "1.20.0":
             raise ValueError("Se requiere Qdrant 1.20.0")
         validate_collections(client, manifest)
+        validate_patent_provenance(client, manifest, settings.data_dir)
         if sha256_file(review_csv) != manifest.review_csv_sha256:
             raise ValueError("CSV distinto del usado para construir la generación")
         folder = settings.data_dir / "generations" / pinned.generation_id
@@ -95,6 +96,8 @@ def backup(client, settings, config, destination: Path, review_csv: Path):
         copy(review_csv, "corpus/revision_corpus.csv")
         for filename in ("embedding.json", "openalex.json"):
             copy(ROOT / "config" / filename, f"config/{filename}")
+        if manifest.patent_selection_sha256:
+            copy(ROOT / "config/epo_ops.json", "config/epo_ops.json")
         for filename in ("pyproject.toml", "uv.lock", "compose.yaml"):
             copy(ROOT / filename, filename)
         snapshots = {}
@@ -220,6 +223,7 @@ def restore(client, qdrant_url: str, source: Path, destination: Path):
                 )
                 response.raise_for_status()
     validate_collections(client, manifest)
+    validate_patent_provenance(client, manifest, destination / "data")
     client.update_collection_aliases(
         [
             models.CreateAliasOperation(

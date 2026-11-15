@@ -79,6 +79,10 @@ def validate_collections(client, manifest, documents=None, passages=None):
         catalog[str(point.id)] = document
     if sum(d.abstract is not None for d in catalog.values()) != manifest.abstract_count:
         raise ValueError("Cobertura de resúmenes incoherente")
+    if any(d.document_type == "patent" for d in catalog.values()) != (
+        manifest.patent_selection_sha256 is not None
+    ):
+        raise ValueError("Patentes y selección de procedencia incoherentes")
     linked = set()
     for point in passage_points:
         payload = point.payload or {}
@@ -118,6 +122,26 @@ def validate_collections(client, manifest, documents=None, passages=None):
         expected = {str(p.passage_id): p.model_dump(mode="json") for p in passages}
         if {str(p.id): (p.payload or {}).get("passage") for p in passage_points} != expected:
             raise ValueError("Fragmentos diferentes después de escribir")
+
+
+def validate_patent_provenance(client, manifest, data_dir):
+    if manifest.patent_selection_sha256 is None:
+        return
+    from app.ingestion.patent_corpus import select_patents
+
+    selection = data_dir / "generations" / manifest.generation_id / "patent_selection.json"
+    if sha256_file(selection) != manifest.patent_selection_sha256:
+        raise ValueError("Selección de patentes alterada")
+    expected = {
+        str(d.document_id): d.model_dump(mode="json") for d in select_patents(data_dir, selection)
+    }
+    actual = {
+        str(p.id): (p.payload or {}).get("document")
+        for p in all_points(client, manifest.documents_collection)
+        if (p.payload or {}).get("document_type") == "patent"
+    }
+    if actual != expected:
+        raise ValueError("Catálogo de patentes diferente de la selección de procedencia")
 
 
 def build_generation(

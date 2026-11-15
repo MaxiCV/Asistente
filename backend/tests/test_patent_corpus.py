@@ -1,10 +1,9 @@
 import json
 from datetime import UTC, datetime
-from uuid import uuid4
 
 import pytest
 from app.catalog.generations import pin_generation
-from app.contracts import Document, SearchParams
+from app.contracts import SearchParams
 from app.core.config import Settings, embedding_config
 from app.core.files import atomic_json, sha256_file
 from app.indexing.publish import publish_generation
@@ -101,25 +100,10 @@ def test_inventors_and_applicants_use_original_names():
     assert document.applicants == ["TEST UNIVERSITY"]
 
 
-def test_mixed_corpus_filters_and_detail(indexed):  # noqa: F811
-    patent = Document(
-        document_id=uuid4(),
-        document_type="patent",
-        publication_type="patent",
-        title="Synthetic WAND patent",
-        content_level="metadata",
-        source_url="https://example.org/patent",
-        identities=[
-            {
-                "publication_id": "US.123.A1",
-                "snapshot_id": "test_patent",
-                "retrieved_at": datetime.now(UTC),
-                "applicants": ["Test University"],
-            }
-        ],
-    )
-    indexed.documents.append(patent)
-    generation = indexed.build()
+def test_mixed_corpus_filters_and_detail(indexed, selected):  # noqa: F811
+    root, _, selection = selected
+    patent = select_patents(root, selection)[0]
+    generation = indexed.build(patent_selection=selection)
     publish_generation(indexed.client, indexed.settings, embedding_config(), generation)
     pinned = pin_generation(indexed.client, indexed.settings.data_dir, embedding_config())
     for kind, expected in [("all", 4), ("publication", 3), ("patent", 1)]:
@@ -130,4 +114,4 @@ def test_mixed_corpus_filters_and_detail(indexed):  # noqa: F811
         assert len(result.results) == expected
     response = indexed.api.get(f"/api/v1/documents/{patent.document_id}")
     assert response.status_code == 200
-    assert response.json()["document"]["identities"][0]["applicants"] == ["Test University"]
+    assert response.json()["document"]["identities"][0]["publication_id"] == "EP.100.A1"
