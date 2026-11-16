@@ -61,6 +61,12 @@ jobs:
           npm --prefix frontend ci --no-fund --no-audit
           npm --prefix frontend run build
 
+      - name: Verificar recorridos de navegador sin proveedores externos
+        working-directory: frontend
+        run: |
+          npx playwright install --with-deps chromium
+          npm run test:e2e
+
   cd:
     name: Despliegue en VM Google Cloud
     needs: ci

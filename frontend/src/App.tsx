@@ -1,5 +1,6 @@
 import { useRef, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
+import Chat from "./Chat";
 import {
   Alert,
   Button,
@@ -307,6 +308,7 @@ function Detail({
 }
 
 export default function App() {
+  const [view, setView] = useState<"search" | "chat">("search");
   const compact = useMediaQuery("(max-width:700px)");
   const [draft, setDraft] = useState<Criteria>(initial);
   const [criteria, setCriteria] = useState<SearchRequest | null>(null);
@@ -405,6 +407,10 @@ export default function App() {
         </a>
       </header>
       <main>
+        <nav className="view-switch" aria-label="Vistas de la colección">
+          <Button variant={view === "search" ? "contained" : "text"} aria-pressed={view === "search"} onClick={() => setView("search")}>Buscar documentos</Button>
+          <Button variant={view === "chat" ? "contained" : "text"} aria-pressed={view === "chat"} onClick={() => setView("chat")}>Conversación</Button>
+        </nav>
         {(corpus.isError || ready.isError) && (
           <div className="notice">
             <Failure
@@ -444,6 +450,7 @@ export default function App() {
             </Alert>
           </div>
         )}
+        <div hidden={view !== "search"}>
         <form
           aria-label="Búsqueda de publicaciones"
           onSubmit={(event) => {
@@ -629,7 +636,7 @@ export default function App() {
                   <>
                     <dl className="corpus-summary">
                       <div>
-                        <dt>Publicaciones</dt>
+                          <dt>Documentos</dt>
                         <dd>{active.document_count}</dd>
                       </div>
                       <div>
@@ -644,7 +651,7 @@ export default function App() {
                     <p className="muted small">
                       Publicada el {dateLabel(active.published_at)}
                       <br />
-                      Fuente: OpenAlex · Español e inglés
+                      {active?.publication_types.includes("patent") ? "Fuentes: OpenAlex y EPO OPS" : "Fuente: OpenAlex"} · Español e inglés
                     </p>
                   </>
                 ) : (
@@ -888,6 +895,10 @@ export default function App() {
             </section>
           </div>
         </form>
+        </div>
+        <div hidden={view !== "chat"}>
+          <Chat active={view === "chat"} initialCriteria={criteria ?? { ...draft, mode: "hybrid" }} corpus={active} openCitation={setSelected} />
+        </div>
       </main>
       <footer>
         Nexo · Detección de caídas en el hogar

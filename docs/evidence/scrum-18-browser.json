@@ -1,0 +1,30 @@
+{
+  "checked_at": "2026-11-16T01:44:06.847Z",
+  "browser": "Edge (isolated Playwright context)",
+  "real_api": true,
+  "turns": [
+    {
+      "turn_id": "04d2cdfc-246d-4a9a-bf9f-7f29d4731068",
+      "conversation_id": "2288d871-2182-5513-87f6-f3d40aec0814",
+      "generation": "s17_20261112_patents",
+      "status": "answered"
+    },
+    {
+      "turn_id": "7f7a87e8-d7b8-43dd-b543-3336c40bc0e3",
+      "conversation_id": "2288d871-2182-5513-87f6-f3d40aec0814",
+      "generation": "s17_20261112_patents",
+      "status": "answered"
+    }
+  ],
+  "passed": true,
+  "citation_capture": {
+    "browser": "Orca embedded browser",
+    "date": "2026-11-16",
+    "reused_saved_conversation": true,
+    "new_inference": false,
+    "viewport": {
+      "width": 1440,
+      "height": 1000
+    }
+  }
+}

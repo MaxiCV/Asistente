@@ -1,5 +1,5 @@
 workspace "Plataforma de búsqueda y consulta para I+D" "Sprint 1 semántica; Sprint 2 BM25/híbrida y RAG; Sprint 3 evaluación. Qdrant sin etapa relacional." {
-    // Decisiones del 4 de noviembre; documentación revisada el 8 de noviembre de 2026.
+    // Decisiones del 4 de noviembre; documentación revisada el 15 de noviembre de 2026.
     // Cinco contenedores C4 en S1; el evaluador futuro eleva el total a seis.
     !impliedRelationships false
     model {
@@ -11,27 +11,27 @@ workspace "Plataforma de búsqueda y consulta para I+D" "Sprint 1 semántica; Sp
         hub = softwareSystem "Hugging Face Hub" "Descarga inicial de pesos con revisión fijada; búsqueda posterior offline." {
             tags "Externo"
         }
-        epo = softwareSystem "EPO OPS" "Sprint 2: patentes, sujeto a acceso y cobertura." {
+        epo = softwareSystem "EPO OPS" "Patentes capturadas y seleccionadas desde Sprint 2; cobertura acotada." {
             tags "Externo,Sprint2"
         }
-        llm = softwareSystem "Proveedor LLM" "Sprint 2: Gemini como opción inicial para síntesis con evidencia; evaluación de respuestas en Sprint 3." {
+        llm = softwareSystem "Proveedor LLM" "Gemini 3.5 Flash-Lite para síntesis con fuentes; evaluación de respuestas en Sprint 3." {
             tags "Externo,Sprint2"
         }
-        plataforma = softwareSystem "Plataforma de consulta para I+D" "Corpus local acotado; búsqueda semántica, después híbrida y conversación." {
-            web = container "Aplicación web" "Busca, filtra, muestra detalle y copia referencias. Conserva index_generation al navegar." "React, TypeScript, Vite, Material UI, TanStack Query" {
+        plataforma = softwareSystem "Plataforma de consulta para I+D" "Corpus local acotado; búsqueda semántica, léxica, híbrida y conversación." {
+            web = container "Aplicación web" "Busca, filtra, muestra fichas y conversa con citas. Conserva generación e ID de envío." "React, TypeScript, Vite, Material UI, TanStack Query" {
                 tags "Frontend"
             }
-            backend = container "Backend / API" "Proceso web; módulos compartidos con CLI. LlamaIndex desde Sprint 2." "Python, FastAPI, Pydantic, qdrant-client" {
-                api = component "API" "Valida entradas; expone búsqueda, detalle, corpus y disponibilidad." "FastAPI, Pydantic"
+            backend = container "Backend / API" "Un proceso web; módulos compartidos con CLI. LlamaIndex adapta el recuperador existente." "Python, FastAPI, Pydantic, qdrant-client" {
+                api = component "API" "Valida entradas; expone búsqueda, detalle, corpus, chat e historial." "FastAPI, Pydantic"
                 catalogo = component "Catálogo y generaciones" "Resuelve alias una vez; fija pareja física y manifiesto; lee detalle y estado del mantenimiento." "Python, qdrant-client"
-                busqueda = component "Recuperación" "S1 semántica, filtros y grupos. S2 añade BM25/RRF. Una generación por petición." "Python, qdrant-client"
+                busqueda = component "Recuperación" "Semántica, BM25/RRF, filtros y grupos. Una generación por petición." "Python, qdrant-client"
                 embeddings = component "Embeddings de consulta" "Pesos locales fijados; verifica compatibilidad con la generación." "Sentence Transformers, multilingual-e5-small" {
                     tags "ModeloLocal"
                 }
-                conversacion = component "Conversación" "Sprint 2: contexto y referencias; seguimiento completo en Sprint 3." "Python, LlamaIndex, qdrant-client" {
+                conversacion = component "Conversación" "Turnos serializados e idempotencia; generación fija e historial Qdrant. Reformulación en S3." "Python, LlamaIndex, qdrant-client" {
                     tags "Sprint2"
                 }
-                generacion = component "Síntesis y referencias" "Sprint 2: genera desde evidencia suficiente y comprueba IDs citados." "LlamaIndex, google-genai" {
+                generacion = component "Síntesis y referencias" "Gemini recibe contexto; comprueba todos los marcadores e IDs citados. Calidad pendiente." "LlamaIndex, google-genai" {
                     tags "Sprint2"
                 }
             }
@@ -44,7 +44,7 @@ workspace "Plataforma de búsqueda y consulta para I+D" "Sprint 1 semántica; Sp
                 }
                 publicacion = component "Publicación y rollback" "Verifica candidata, cambia alias juntos y registra recibo. Resuelve timeout leyendo alias. Retiro controlado pendiente en SCRUM-26." "Python, qdrant-client"
             }
-            datos = container "Qdrant" "Única BD. documents_g y passages_g; alias documents/passages. Historial separado desde Sprint 2." "Qdrant local persistente" {
+            datos = container "Qdrant" "Única BD. documents_g y passages_g; alias documents/passages. chat_turns separado, sin vectores ni alias." "Qdrant local persistente" {
                 tags "BaseDatos"
             }
             archivos = container "Archivos persistentes" "Snapshots, CSV, manifiestos, recibos de publicación, runs y pesos fijados. Sin puntero activo independiente de alias." "Volúmenes locales, JSONL, JSON, CSV" {
@@ -58,20 +58,20 @@ workspace "Plataforma de búsqueda y consulta para I+D" "Sprint 1 semántica; Sp
         responsable -> plataforma "Mantiene corpus, modelos y respaldos"
         plataforma -> openalex "Captura publicaciones" "HTTPS"
         plataforma -> hub "Descarga pesos fijados durante preparación" "HTTPS"
-        plataforma -> epo "Desde S2 captura patentes" "HTTPS"
-        plataforma -> llm "Desde S2 genera respuestas; evalúa en S3" "HTTPS"
+        plataforma -> epo "Captura patentes mediante fetch-patents" "HTTPS"
+        plataforma -> llm "Genera respuestas; evaluación prevista en S3" "HTTPS"
 
         investigador -> web "Consulta y navega resultados" "Navegador"
         responsable -> cli "Ejecuta fetch/build/publish y mantenimiento" "CLI"
         responsable -> archivos "Revisa selección CSV y conserva respaldos" "Archivos locales"
         responsable -> evaluacion "Desde S3 ejecuta evaluación" "CLI"
-        web -> backend "Búsqueda, detalle y chat desde S2" "HTTP / JSON"
-        backend -> datos "Lee corpus; desde S2 conserva historial separado" "HTTP / JSON"
+        web -> backend "Búsqueda, detalle, chat e historial" "HTTP / JSON"
+        backend -> datos "Lee corpus y conserva historial separado" "HTTP / JSON"
         backend -> archivos "Lee manifiestos, runs y pesos" "Sistema de archivos"
-        backend -> llm "Desde S2 solicita síntesis" "HTTPS"
+        backend -> llm "Solicita síntesis con contexto e historial breve" "HTTPS"
         cli -> openalex "fetch: captura publicaciones" "HTTPS / JSON"
         cli -> hub "prepare-model: descarga una revisión fijada" "HTTPS"
-        cli -> epo "Desde S2 captura patentes" "HTTPS / OPS"
+        cli -> epo "Captura patentes mediante fetch-patents" "HTTPS / OPS"
         cli -> datos "build/publish: escribe candidata y cambia alias" "HTTP / JSON"
         cli -> archivos "Captura, revisiones, manifiestos y pesos" "Sistema de archivos"
         evaluacion -> backend "Desde S3 consulta modos de recuperación y chat" "HTTP / JSON"
@@ -81,17 +81,17 @@ workspace "Plataforma de búsqueda y consulta para I+D" "Sprint 1 semántica; Sp
         web -> api "Envía consulta, filtros y generación" "HTTP / JSON"
         api -> catalogo "Fija generación y obtiene detalle/cobertura" "Llamada Python"
         api -> busqueda "Busca con la generación capturada" "Llamada Python"
-        api -> conversacion "Desde S2 procesa preguntas" "Llamada Python"
+        api -> conversacion "Procesa preguntas e historial" "Llamada Python"
         catalogo -> datos "Resuelve alias y lee documents_g" "HTTP / JSON"
         catalogo -> archivos "Lee manifiesto g y último intento de mantenimiento" "Archivos"
         busqueda -> embeddings "Vectoriza con la configuración fijada" "Llamada Python"
-        busqueda -> datos "Consulta passages_g con filtros y agrupación; S2 añade BM25/RRF" "HTTP / JSON"
+        busqueda -> datos "Consulta passages_g con filtros, grupos y BM25/RRF" "HTTP / JSON"
         busqueda -> catalogo "Hidrata documentos de la misma generación" "Llamada Python"
         embeddings -> archivos "Carga pesos locales fijados; offline" "Archivos"
         conversacion -> catalogo "Fija generación para todo el turno" "Llamada Python"
         conversacion -> busqueda "Recupera evidencia mediante adaptador" "Llamada Python"
-        conversacion -> generacion "Entrega fragmentos suficientes e IDs permitidos" "Llamada Python"
-        conversacion -> datos "Lee y guarda historial separado del corpus" "HTTP / JSON"
+        conversacion -> generacion "Entrega fragmentos e IDs permitidos" "Llamada Python"
+        conversacion -> datos "Serializa turnos; lee y confirma guardado en chat_turns" "HTTP / JSON"
         generacion -> llm "Solicita síntesis con evidencia" "HTTPS"
 
         responsable -> preparacion "Ejecuta prepare-model o check-model" "CLI"
@@ -157,7 +157,7 @@ workspace "Plataforma de búsqueda y consulta para I+D" "Sprint 1 semántica; Sp
             catalogo -> datos "Lee documents_g"
             autoLayout lr
         }
-        dynamic backend "D2-ConsultaRAG" "Sprint 2: BM25/RRF y LlamaIndex; IDs de referencias comprobados funcionalmente. Calidad en S3." {
+        dynamic backend "D2-ConsultaRAG" "Implementado S2: BM25/RRF y LlamaIndex; citas verificadas estructuralmente. Calidad en S3." {
             web -> api "Envía pregunta"
             api -> conversacion "Procesa turno"
             conversacion -> catalogo "Fija generación del turno"
@@ -167,7 +167,7 @@ workspace "Plataforma de búsqueda y consulta para I+D" "Sprint 1 semántica; Sp
             busqueda -> embeddings "Calcula vector denso"
             busqueda -> datos "Ejecuta denso + BM25 + RRF con filtros"
             busqueda -> catalogo "Hidrata documentos g"
-            conversacion -> generacion "Entrega evidencia suficiente e IDs permitidos"
+            conversacion -> generacion "Entrega contexto e IDs permitidos"
             generacion -> llm "Solicita síntesis con referencias"
             conversacion -> datos "Guarda turno e IDs del contexto"
             autoLayout lr
