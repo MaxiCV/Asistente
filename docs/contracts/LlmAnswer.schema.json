@@ -1,0 +1,34 @@
+{
+  "additionalProperties": false,
+  "properties": {
+    "status": {
+      "enum": [
+        "answered",
+        "insufficient_evidence"
+      ],
+      "title": "Status",
+      "type": "string"
+    },
+    "answer": {
+      "maxLength": 16000,
+      "minLength": 1,
+      "title": "Answer",
+      "type": "string"
+    },
+    "cited_sources": {
+      "items": {
+        "type": "integer"
+      },
+      "maxItems": 10,
+      "title": "Cited Sources",
+      "type": "array"
+    }
+  },
+  "required": [
+    "status",
+    "answer",
+    "cited_sources"
+  ],
+  "title": "LlmAnswer",
+  "type": "object"
+}

@@ -1,0 +1,12 @@
+{
+  "provider": "google-genai",
+  "model": "gemini-3.5-flash-lite",
+  "temperature": null,
+  "max_output_tokens": 2048,
+  "top_k": 5,
+  "max_history_turns": 4,
+  "max_prompt_chars": 40000,
+  "timeout_seconds": 30,
+  "operation_timeout_seconds": 60,
+  "default_mode": "hybrid"
+}

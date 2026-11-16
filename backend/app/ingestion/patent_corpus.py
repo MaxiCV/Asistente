@@ -1,27 +1,21 @@
 """Selección explícita de patentes capturadas; nunca aprueba todo un snapshot."""
 
-import json
 import re
 from datetime import datetime
 from pathlib import Path
 from uuid import NAMESPACE_URL, uuid5
 
-from pydantic import Field, TypeAdapter
+from pydantic import TypeAdapter
 
-from app.contracts import Contract, Document, GenerationId, PatentSourceIdentity, Text
+from app.contracts import (
+    Document,
+    GenerationId,
+    PatentSelectionFile,
+    PatentSnapshotManifest,
+    PatentSourceIdentity,
+)
 from app.core.files import sha256_file
 from app.ingestion.epo_ops import parse_page
-
-
-class PatentSelection(Contract):
-    snapshot_id: GenerationId
-    publication_id: Text
-    reason: Text
-    scope: Text
-
-
-class PatentSelectionFile(Contract):
-    records: list[PatentSelection] = Field(min_length=1)
 
 
 def select_patents(data_dir: Path, selection_path: Path):
@@ -35,7 +29,9 @@ def select_patents(data_dir: Path, selection_path: Path):
         seen.add(row.publication_id)
         if row.snapshot_id not in snapshots:
             target = data_dir / "patents/snapshots" / row.snapshot_id
-            manifest = json.loads((target / "manifest.json").read_text("utf-8"))
+            manifest = PatentSnapshotManifest.model_validate_json(
+                (target / "manifest.json").read_text("utf-8")
+            ).model_dump(mode="json")
             if (
                 manifest.get("status") != "complete"
                 or manifest.get("source") != "epo_ops"

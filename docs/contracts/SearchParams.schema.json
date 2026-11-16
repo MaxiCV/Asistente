@@ -17,19 +17,6 @@
       "title": "Q",
       "type": "string"
     },
-    "page": {
-      "default": 1,
-      "minimum": 1,
-      "title": "Page",
-      "type": "integer"
-    },
-    "page_size": {
-      "default": 20,
-      "maximum": 100,
-      "minimum": 1,
-      "title": "Page Size",
-      "type": "integer"
-    },
     "date_from": {
       "anyOf": [
         {
@@ -91,6 +78,19 @@
       ],
       "default": null,
       "title": "Index Generation"
+    },
+    "page": {
+      "default": 1,
+      "minimum": 1,
+      "title": "Page",
+      "type": "integer"
+    },
+    "page_size": {
+      "default": 20,
+      "maximum": 100,
+      "minimum": 1,
+      "title": "Page Size",
+      "type": "integer"
     }
   },
   "required": [

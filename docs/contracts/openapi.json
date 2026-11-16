@@ -2,8 +2,8 @@
   "openapi": "3.1.0",
   "info": {
     "title": "Buscador de literatura sobre detección de caídas",
-    "description": "Búsqueda semántica local con filtros y generación fijada. Calidad en Sprint 3.",
-    "version": "0.2.0"
+    "description": "Búsqueda semántica, BM25 e híbrida de publicaciones y patentes. Chat RAG con LlamaIndex, Gemini, referencias y generación fijada. Calidad en Sprint 3.",
+    "version": "0.3.0"
   },
   "paths": {
     "/api/v1/health": {
@@ -79,29 +79,6 @@
               "minLength": 1,
               "maxLength": 300,
               "title": "Q"
-            }
-          },
-          {
-            "name": "page",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "integer",
-              "minimum": 1,
-              "default": 1,
-              "title": "Page"
-            }
-          },
-          {
-            "name": "page_size",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "integer",
-              "maximum": 100,
-              "minimum": 1,
-              "default": 20,
-              "title": "Page Size"
             }
           },
           {
@@ -186,6 +163,29 @@
               ],
               "title": "Index Generation"
             }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "default": 1,
+              "title": "Page"
+            }
+          },
+          {
+            "name": "page_size",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "maximum": 100,
+              "minimum": 1,
+              "default": 20,
+              "title": "Page Size"
+            }
           }
         ],
         "responses": {
@@ -210,7 +210,7 @@
             }
           },
           "409": {
-            "description": "Generación retirada",
+            "description": "generation_retired o search_mode_unavailable",
             "content": {
               "application/json": {
                 "schema": {
@@ -220,11 +220,19 @@
             }
           },
           "422": {
-            "description": "Validation Error",
+            "description": "Validación de entrada o query_not_encodable",
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
+                  "anyOf": [
+                    {
+                      "$ref": "#/components/schemas/ErrorResponse"
+                    },
+                    {
+                      "$ref": "#/components/schemas/RequestValidationResponse"
+                    }
+                  ],
+                  "title": "Response 422 Search Api V1 Documents Get"
                 }
               }
             }
@@ -290,11 +298,29 @@
             }
           },
           "409": {
-            "description": "Generación retirada",
+            "description": "generation_retired o search_mode_unavailable",
             "content": {
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validación de entrada o query_not_encodable",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "anyOf": [
+                    {
+                      "$ref": "#/components/schemas/ErrorResponse"
+                    },
+                    {
+                      "$ref": "#/components/schemas/RequestValidationResponse"
+                    }
+                  ],
+                  "title": "Response 422 Detail Api V1 Documents  Document Id  Get"
                 }
               }
             }
@@ -308,16 +334,6 @@
               }
             },
             "description": "Not Found"
-          },
-          "422": {
-            "description": "Validation Error",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
-              }
-            }
           }
         }
       }
@@ -351,11 +367,204 @@
             }
           },
           "409": {
-            "description": "Generación retirada",
+            "description": "generation_retired o search_mode_unavailable",
             "content": {
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validación de entrada o query_not_encodable",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "anyOf": [
+                    {
+                      "$ref": "#/components/schemas/ErrorResponse"
+                    },
+                    {
+                      "$ref": "#/components/schemas/RequestValidationResponse"
+                    }
+                  ],
+                  "title": "Response 422 Corpus Api V1 Corpus Get"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/chat": {
+      "post": {
+        "tags": [
+          "Conversación"
+        ],
+        "summary": "Chat",
+        "operationId": "chat_api_v1_chat_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ChatRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ChatResponse"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "llm_unavailable, chat_history_unavailable, model_unavailable, corpus_unavailable o dependency_unavailable",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "generation_retired, search_mode_unavailable, conversation_generation_mismatch o request_id_conflict",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validación de entrada o query_not_encodable",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "anyOf": [
+                    {
+                      "$ref": "#/components/schemas/ErrorResponse"
+                    },
+                    {
+                      "$ref": "#/components/schemas/RequestValidationResponse"
+                    }
+                  ],
+                  "title": "Response 422 Chat Api V1 Chat Post"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "conversation_not_found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "502": {
+            "description": "llm_failed: proveedor, salida estructurada o plazo total",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/chat/{conversation_id}": {
+      "get": {
+        "tags": [
+          "Conversación"
+        ],
+        "summary": "Conversation",
+        "operationId": "conversation_api_v1_chat__conversation_id__get",
+        "parameters": [
+          {
+            "name": "conversation_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Conversation Id"
+            }
+          },
+          {
+            "name": "after",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "minimum": 0,
+              "default": 0,
+              "title": "After"
+            }
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "maximum": 100,
+              "minimum": 1,
+              "default": 20,
+              "title": "Limit"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ConversationResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Not Found"
+          },
+          "503": {
+            "description": "chat_history_unavailable",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
                 }
               }
             }
@@ -438,6 +647,259 @@
         "type": "object",
         "title": "Bm25Config"
       },
+      "ChatRequest": {
+        "properties": {
+          "request_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Request Id"
+          },
+          "question": {
+            "type": "string",
+            "maxLength": 1000,
+            "minLength": 1,
+            "title": "Question"
+          },
+          "conversation_id": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "uuid"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Conversation Id"
+          },
+          "mode": {
+            "anyOf": [
+              {
+                "type": "string",
+                "enum": [
+                  "semantic",
+                  "lexical",
+                  "hybrid"
+                ]
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Mode"
+          },
+          "document_type": {
+            "type": "string",
+            "enum": [
+              "publication",
+              "patent",
+              "all"
+            ],
+            "title": "Document Type",
+            "default": "all"
+          },
+          "date_from": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Date From"
+          },
+          "date_to": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Date To"
+          },
+          "publication_type": {
+            "anyOf": [
+              {
+                "type": "string",
+                "minLength": 1
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Publication Type"
+          },
+          "index_generation": {
+            "anyOf": [
+              {
+                "type": "string",
+                "pattern": "^[a-z0-9][a-z0-9_-]{0,63}$"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Index Generation"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "request_id",
+          "question"
+        ],
+        "title": "ChatRequest"
+      },
+      "ChatResponse": {
+        "properties": {
+          "conversation_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Conversation Id"
+          },
+          "turn_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Turn Id"
+          },
+          "turn_index": {
+            "type": "integer",
+            "minimum": 1.0,
+            "title": "Turn Index"
+          },
+          "index_generation": {
+            "type": "string",
+            "pattern": "^[a-z0-9][a-z0-9_-]{0,63}$",
+            "title": "Index Generation"
+          },
+          "mode": {
+            "type": "string",
+            "enum": [
+              "semantic",
+              "lexical",
+              "hybrid"
+            ],
+            "title": "Mode"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "answered",
+              "insufficient_evidence"
+            ],
+            "title": "Status"
+          },
+          "evidence_level": {
+            "type": "string",
+            "enum": [
+              "abstract",
+              "metadata_only",
+              "mixed",
+              "none"
+            ],
+            "title": "Evidence Level"
+          },
+          "answer": {
+            "type": "string",
+            "minLength": 1,
+            "title": "Answer"
+          },
+          "citations": {
+            "items": {
+              "$ref": "#/components/schemas/Citation"
+            },
+            "type": "array",
+            "title": "Citations"
+          },
+          "context": {
+            "items": {
+              "$ref": "#/components/schemas/ContextPassage"
+            },
+            "type": "array",
+            "title": "Context"
+          },
+          "model": {
+            "anyOf": [
+              {
+                "type": "string",
+                "minLength": 1
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Model"
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Created At"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "conversation_id",
+          "turn_id",
+          "turn_index",
+          "index_generation",
+          "mode",
+          "status",
+          "evidence_level",
+          "answer",
+          "citations",
+          "context",
+          "model",
+          "created_at"
+        ],
+        "title": "ChatResponse"
+      },
+      "ChatTurn": {
+        "properties": {
+          "schema_version": {
+            "type": "integer",
+            "const": 1,
+            "title": "Schema Version",
+            "default": 1
+          },
+          "request": {
+            "$ref": "#/components/schemas/ChatRequest"
+          },
+          "request_sha256": {
+            "type": "string",
+            "pattern": "^[0-9a-f]{64}$",
+            "title": "Request Sha256"
+          },
+          "response": {
+            "$ref": "#/components/schemas/ChatResponse"
+          },
+          "rejection_reason": {
+            "anyOf": [
+              {
+                "type": "string",
+                "minLength": 1
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Rejection Reason"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "request",
+          "request_sha256",
+          "response"
+        ],
+        "title": "ChatTurn"
+      },
       "ChunkingConfig": {
         "properties": {
           "method": {
@@ -468,6 +930,195 @@
         "additionalProperties": false,
         "type": "object",
         "title": "ChunkingConfig"
+      },
+      "Citation": {
+        "properties": {
+          "marker": {
+            "type": "integer",
+            "maximum": 10.0,
+            "minimum": 1.0,
+            "title": "Marker"
+          },
+          "document_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Document Id"
+          },
+          "passage_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Passage Id"
+          },
+          "title": {
+            "type": "string",
+            "minLength": 1,
+            "title": "Title"
+          },
+          "document_type": {
+            "type": "string",
+            "enum": [
+              "publication",
+              "patent"
+            ],
+            "title": "Document Type"
+          },
+          "content_level": {
+            "type": "string",
+            "enum": [
+              "abstract",
+              "metadata"
+            ],
+            "title": "Content Level"
+          },
+          "source_url": {
+            "type": "string",
+            "maxLength": 2083,
+            "minLength": 1,
+            "format": "uri",
+            "title": "Source Url"
+          },
+          "doi": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Doi"
+          },
+          "publication_id": {
+            "anyOf": [
+              {
+                "type": "string",
+                "minLength": 1
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Publication Id"
+          },
+          "publication_date": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Publication Date"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "marker",
+          "document_id",
+          "passage_id",
+          "title",
+          "document_type",
+          "content_level",
+          "source_url"
+        ],
+        "title": "Citation"
+      },
+      "ContextPassage": {
+        "properties": {
+          "rank": {
+            "type": "integer",
+            "maximum": 10.0,
+            "minimum": 1.0,
+            "title": "Rank"
+          },
+          "document_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Document Id"
+          },
+          "passage_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Passage Id"
+          },
+          "text_sha256": {
+            "type": "string",
+            "pattern": "^[0-9a-f]{64}$",
+            "title": "Text Sha256"
+          },
+          "score": {
+            "type": "number",
+            "title": "Score"
+          },
+          "content_level": {
+            "type": "string",
+            "enum": [
+              "abstract",
+              "metadata"
+            ],
+            "title": "Content Level"
+          },
+          "cited": {
+            "type": "boolean",
+            "title": "Cited"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "rank",
+          "document_id",
+          "passage_id",
+          "text_sha256",
+          "score",
+          "content_level",
+          "cited"
+        ],
+        "title": "ContextPassage"
+      },
+      "ConversationResponse": {
+        "properties": {
+          "conversation_id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Conversation Id"
+          },
+          "index_generation": {
+            "type": "string",
+            "pattern": "^[a-z0-9][a-z0-9_-]{0,63}$",
+            "title": "Index Generation"
+          },
+          "turns": {
+            "items": {
+              "$ref": "#/components/schemas/ChatTurn"
+            },
+            "type": "array",
+            "title": "Turns"
+          },
+          "next_cursor": {
+            "anyOf": [
+              {
+                "type": "integer",
+                "minimum": 1.0
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Next Cursor"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "conversation_id",
+          "index_generation",
+          "turns"
+        ],
+        "title": "ConversationResponse"
       },
       "CorpusResponse": {
         "properties": {
@@ -1012,6 +1663,25 @@
           "retrieved_at"
         ],
         "title": "PatentSourceIdentity"
+      },
+      "RequestValidationResponse": {
+        "properties": {
+          "detail": {
+            "items": {
+              "additionalProperties": true,
+              "type": "object"
+            },
+            "type": "array",
+            "title": "Detail"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "detail"
+        ],
+        "title": "RequestValidationResponse",
+        "description": "Errores de validación de entrada emitidos por FastAPI."
       },
       "RunRecord": {
         "properties": {

@@ -3,7 +3,7 @@ from pathlib import Path
 from pydantic import AliasChoices, Field, SecretStr, field_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
-from app.contracts import EmbeddingConfig
+from app.contracts import ChatConfig, EmbeddingConfig
 
 ROOT = Path(__file__).resolve().parents[3]
 
@@ -18,6 +18,12 @@ class Settings(BaseSettings):
     qdrant_url: str = "http://127.0.0.1:6333"
     data_dir: Path = Field(default=ROOT / "data", validation_alias="ASISTENTE_DATA_DIR")
     openalex_api_key: SecretStr | None = None
+    gemini_api_key: SecretStr | None = Field(
+        default=None, validation_alias=AliasChoices("GEMINI_API_KEY", "GOOGLE_API_KEY")
+    )
+    chat_collection: str = Field(
+        default="chat_turns", pattern=r"^(chat_turns|test_[a-z0-9_]+_chat_turns)$"
+    )
     epo_ops_consumer_key: SecretStr | None = Field(
         default=None, validation_alias=AliasChoices("epo_ops_consumer_key", "EPO_CONSUMER_KEY")
     )
@@ -36,3 +42,7 @@ class Settings(BaseSettings):
 
 def embedding_config() -> EmbeddingConfig:
     return EmbeddingConfig.model_validate_json((ROOT / "config/embedding.json").read_text("utf-8"))
+
+
+def chat_config() -> ChatConfig:
+    return ChatConfig.model_validate_json((ROOT / "config/chat.json").read_text("utf-8"))

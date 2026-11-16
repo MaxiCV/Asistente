@@ -1,6 +1,6 @@
 {
   "additionalProperties": false,
-  "description": "Registro de captura OPS; aún no forma parte del índice de publicaciones.",
+  "description": "Registro OPS seleccionable para el corpus de publicaciones y patentes.",
   "properties": {
     "schema_version": {
       "const": 1,

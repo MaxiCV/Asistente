@@ -13,15 +13,24 @@ from app.catalog.generations import (
     pin_generation,
     read_generation,
 )
+from app.chat.errors import ChatError
+from app.chat.history import ChatHistoryStore
+from app.chat.llm import GeminiAnswerer
+from app.chat.service import ChatService
 from app.contracts import (
+    ChatConfig,
+    ChatRequest,
+    ChatResponse,
+    ConversationResponse,
     CorpusResponse,
     DocumentResponse,
     ErrorResponse,
     GenerationId,
+    RequestValidationResponse,
     SearchParams,
     SearchResponse,
 )
-from app.core.config import Settings, embedding_config
+from app.core.config import Settings, chat_config, embedding_config
 from app.core.qdrant import qdrant_connection
 from app.embeddings.local import LocalEncoder
 from app.search.service import (
@@ -35,9 +44,17 @@ from app.search.service import (
 logger = logging.getLogger(__name__)
 
 
-def create_app(settings: Settings | None = None, encoder_factory=LocalEncoder) -> FastAPI:
+def create_app(
+    settings: Settings | None = None,
+    encoder_factory=LocalEncoder,
+    *,
+    llm_factory=GeminiAnswerer,
+    history_factory=ChatHistoryStore,
+    chat_settings: ChatConfig | None = None,
+) -> FastAPI:
     settings = settings or Settings()
     config = embedding_config()
+    chat_options = chat_settings or chat_config()
 
     @asynccontextmanager
     async def lifespan(app: FastAPI):
@@ -48,19 +65,32 @@ def create_app(settings: Settings | None = None, encoder_factory=LocalEncoder) -
         except Exception as exc:
             logger.error("No se pudo cargar el modelo local: %s", type(exc).__name__)
         app.state.model_load_seconds = perf_counter() - started
-        yield
-        app.state.encoder = None
+        app.state.chat_history = history_factory(settings)
+        app.state.chat_service = ChatService(
+            settings, chat_options, app.state.chat_history, retrieve_chat, llm_factory
+        )
+        try:
+            yield
+        finally:
+            app.state.encoder = None
+            await app.state.chat_history.aclose()
 
     api = FastAPI(
         title="Buscador de literatura sobre detección de caídas",
-        version="0.2.0",
-        description="Búsqueda semántica local con filtros y generación fijada. "
-        "Calidad en Sprint 3.",
+        version="0.3.0",
+        description="Búsqueda semántica, BM25 e híbrida de publicaciones y patentes. "
+        "Chat RAG con LlamaIndex, Gemini, referencias y generación fijada. Calidad en Sprint 3.",
         lifespan=lifespan,
     )
 
     def error(status, code, message):
         return HTTPException(status_code=status, detail={"code": code, "message": message})
+
+    @api.exception_handler(ChatError)
+    async def chat_error_handler(_, exc):
+        return JSONResponse(
+            status_code=exc.status, content={"detail": {"code": exc.code, "message": exc.message}}
+        )
 
     @contextmanager
     def reader(generation=None, *, needs_model=True):
@@ -95,7 +125,7 @@ def create_app(settings: Settings | None = None, encoder_factory=LocalEncoder) -
 
     @api.get("/api/v1/health", tags=["Disponibilidad"])
     def health():
-        return {"status": "ok", "version": "0.2.0"}
+        return {"status": "ok", "version": "0.3.0"}
 
     @api.get("/api/v1/ready", tags=["Disponibilidad"], responses={503: {"description": "No listo"}})
     def ready():
@@ -118,12 +148,20 @@ def create_app(settings: Settings | None = None, encoder_factory=LocalEncoder) -
                 "status": "ready" if complete else "not_ready",
                 "checks": checks,
                 "index_generation": generation,
+                "chat": bool(settings.gemini_api_key),
             },
         )
 
     unavailable = {
         503: {"model": ErrorResponse, "description": "Dependencia no disponible"},
-        409: {"model": ErrorResponse, "description": "Generación retirada"},
+        409: {
+            "model": ErrorResponse,
+            "description": "generation_retired o search_mode_unavailable",
+        },
+        422: {
+            "model": ErrorResponse | RequestValidationResponse,
+            "description": "Validación de entrada o query_not_encodable",
+        },
     }
 
     @api.get(
@@ -191,6 +229,72 @@ def create_app(settings: Settings | None = None, encoder_factory=LocalEncoder) -
                 publication_types=manifest.publication_types,
                 maintenance_status_unavailable=invalid,
             )
+
+    def retrieve_chat(params, top_k):
+        from app.chat.retriever import CorpusRetriever
+
+        with reader(params.index_generation, needs_model=params.mode != "lexical") as (
+            client,
+            pinned,
+        ):
+            try:
+                retriever = CorpusRetriever(client, pinned, api.state.encoder, params, top_k)
+                retriever.retrieve(params.q)
+                return pinned, retriever.passages
+            except SearchModeUnavailable:
+                raise error(
+                    409,
+                    "search_mode_unavailable",
+                    "Esta generación admite solo búsqueda semántica.",
+                ) from None
+            except QueryNotEncodable:
+                raise error(
+                    422,
+                    "query_not_encodable",
+                    "Reduce la longitud de la pregunta para procesarla con el modelo local.",
+                ) from None
+
+    @api.post(
+        "/api/v1/chat",
+        response_model=ChatResponse,
+        tags=["Conversación"],
+        responses={
+            **unavailable,
+            404: {"model": ErrorResponse, "description": "conversation_not_found"},
+            409: {
+                "model": ErrorResponse,
+                "description": "generation_retired, search_mode_unavailable, "
+                "conversation_generation_mismatch o request_id_conflict",
+            },
+            502: {
+                "model": ErrorResponse,
+                "description": "llm_failed: proveedor, salida estructurada o plazo total",
+            },
+            503: {
+                "model": ErrorResponse,
+                "description": "llm_unavailable, chat_history_unavailable, model_unavailable, "
+                "corpus_unavailable o dependency_unavailable",
+            },
+        },
+    )
+    async def chat(request: ChatRequest):
+        return await api.state.chat_service.answer(request)
+
+    @api.get(
+        "/api/v1/chat/{conversation_id}",
+        response_model=ConversationResponse,
+        tags=["Conversación"],
+        responses={
+            404: {"model": ErrorResponse},
+            503: {"model": ErrorResponse, "description": "chat_history_unavailable"},
+        },
+    )
+    async def conversation(
+        conversation_id: UUID,
+        after: Annotated[int, Query(ge=0)] = 0,
+        limit: Annotated[int, Query(ge=1, le=100)] = 20,
+    ):
+        return await api.state.chat_history.conversation(conversation_id, after, limit)
 
     return api
 

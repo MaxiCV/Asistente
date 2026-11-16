@@ -56,6 +56,16 @@ def test_selection_stable_ids_and_provenance(selected):
     assert select_patents(root, selection)[0].document_id == first.document_id
 
 
+@pytest.mark.parametrize("missing", ["patents.jsonl", "page_0001.xml"])
+def test_complete_manifest_requires_both_export_and_raw_xml(selected, missing):
+    root, folder, selection = selected
+    manifest = json.loads((folder / "manifest.json").read_text())
+    del manifest["files"][missing]
+    atomic_json(folder / "manifest.json", manifest)
+    with pytest.raises(ValueError, match="Snapshot OPS completo"):
+        select_patents(root, selection)
+
+
 @pytest.mark.parametrize("invalid", ["hash", "incomplete", "duplicate", "missing"])
 def test_selection_rejects_invalid_sources(selected, invalid):
     root, folder, selection = selected

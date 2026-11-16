@@ -219,6 +219,9 @@ def fetch_patents(settings: Settings, config: PatentFetchConfig, snapshot_id: st
         "files": {},
         "error_code": "INTERRUPTED",
     }
+    from app.contracts import PatentSnapshotManifest
+
+    PatentSnapshotManifest.model_validate(manifest)
     atomic_json(target / "manifest.json", manifest)
     ops = None
     seen = set()
@@ -264,5 +267,6 @@ def fetch_patents(settings: Settings, config: PatentFetchConfig, snapshot_id: st
         manifest["requests"] = ops.requests if ops else []
         if (target / "patents.jsonl").exists():
             manifest["files"]["patents.jsonl"] = sha256_file(target / "patents.jsonl")
+        PatentSnapshotManifest.model_validate(manifest)
         atomic_json(target / "manifest.json", manifest)
     return manifest
