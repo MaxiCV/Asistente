@@ -1,0 +1,193 @@
+{
+  "generation": "s17_20261112_patents",
+  "selected": [
+    {
+      "id": "e54b80e5-aa69-54bb-9cbb-b70fd6f68a0d",
+      "title": "TV/STB VOLUME/CAPTIONS AUTO ADJUSTMENT WITH MMWAVE - FALL DETECTION USING MMWAVE",
+      "date": "2026-08-27",
+      "inventors": [
+        "Duddu, Srinivasarao",
+        "Siddappa, Ananda"
+      ],
+      "identity": {
+        "source": "epo_ops",
+        "publication_id": "US.20260255015.A1",
+        "snapshot_id": "ops_20261112_falls",
+        "retrieved_at": "2026-11-13T02:10:08.827252Z",
+        "applicants": [
+          "DISH Network Technologies India Private Limited"
+        ]
+      }
+    },
+    {
+      "id": "5df211a1-35ff-506c-a293-adbce47cc8f9",
+      "title": "Fall detection false alarm suppression method and system for smartwatch integrated with multiple sensors",
+      "date": "2026-08-07",
+      "inventors": [
+        "韩书明",
+        "李强"
+      ],
+      "identity": {
+        "source": "epo_ops",
+        "publication_id": "CN.122531182.A",
+        "snapshot_id": "ops_20261112_falls",
+        "retrieved_at": "2026-11-13T02:10:08.827252Z",
+        "applicants": [
+          "深圳市易维鹰途科技有限公司"
+        ]
+      }
+    },
+    {
+      "id": "420db4ab-526e-5467-9a73-429c6c57b9c3",
+      "title": "Fall detection alarm algorithm based on posture recognition and edge-cloud cooperation",
+      "date": "2026-08-04",
+      "inventors": [
+        "叶才增",
+        "王鹏",
+        "朱旭刚",
+        "秦继林",
+        "杜玉霞",
+        "许泽政"
+      ],
+      "identity": {
+        "source": "epo_ops",
+        "publication_id": "CN.122511023.A",
+        "snapshot_id": "ops_20261112_falls",
+        "retrieved_at": "2026-11-13T02:10:08.827252Z",
+        "applicants": [
+          "山东商业职业技术学院",
+          "济南工程职业技术学院"
+        ]
+      }
+    },
+    {
+      "id": "d3a687be-1e4a-5fea-8bca-fe8838fc140a",
+      "title": "Fall detection method based on sample generation and feature separation",
+      "date": "2026-08-07",
+      "inventors": [
+        "卢华隆"
+      ],
+      "identity": {
+        "source": "epo_ops",
+        "publication_id": "CN.122531109.A",
+        "snapshot_id": "ops_20261112_falls",
+        "retrieved_at": "2026-11-13T02:10:08.827252Z",
+        "applicants": [
+          "山东省博怡尔康医疗器械有限公司"
+        ]
+      }
+    },
+    {
+      "id": "c44d395d-3cd9-5fdf-958d-30051ea913fb",
+      "title": "INTELLIGENT FALL DETECTION AND PREVENTION SYSTEM AND METHOD FOR CARE ENVIRONMENTS",
+      "date": "2026-10-29",
+      "inventors": [
+        "RÄISÄNEN, Heikki",
+        "MITJONEN, Jouni",
+        "RANTA, Jukka",
+        "ALASAUKKO-OJA, Mikko"
+      ],
+      "identity": {
+        "source": "epo_ops",
+        "publication_id": "WO.2026226852.A1",
+        "snapshot_id": "ops_20261112_falls",
+        "retrieved_at": "2026-11-13T02:10:08.827252Z",
+        "applicants": [
+          "EMFIT CORP.",
+          "EMFIT LTD."
+        ]
+      }
+    },
+    {
+      "id": "76ec84d2-02d4-5ecd-a097-4e7a6d4dba23",
+      "title": "Running Time Prediction Algorithm for WAND Queries",
+      "date": "2016-06-30",
+      "inventors": [
+        "MARIN MAURICIO",
+        "GIL-COSTA VERÓNICA",
+        "ROJAS OSCAR"
+      ],
+      "identity": {
+        "source": "epo_ops",
+        "publication_id": "US.2016189026.A1",
+        "snapshot_id": "ops_20261112_rojas",
+        "retrieved_at": "2026-11-13T02:10:43.367114Z",
+        "applicants": [
+          "UNIVERSIDAD DE SANTIAGO DE CHILE"
+        ]
+      }
+    }
+  ],
+  "snapshots": [
+    {
+      "snapshot_id": "ops_20261112_falls",
+      "status": "complete",
+      "config": {
+        "query": "ta=\"fall detection\"",
+        "max_records": 25,
+        "page_size": 25,
+        "max_requests": 100,
+        "timeout_seconds": 30.0,
+        "request_interval_seconds": 6.0,
+        "max_retries": 2,
+        "max_retry_wait_seconds": 60.0
+      },
+      "record_count": 25,
+      "files": {
+        "page_0001.xml": "2e9e8d0f785367be65dbd957a9aba4bc9fb4e5269e195c30d2ae9091c709be74",
+        "patents.jsonl": "f716fbccd6bf036ba13c447f0c8dc4f70817d99bf6390af4cd9728ff785c0af9"
+      },
+      "requests": [
+        {
+          "operation": "token",
+          "status": 200,
+          "attempt": 1
+        },
+        {
+          "operation": "search",
+          "status": 200,
+          "attempt": 1,
+          "search_throttle": {
+            "state": "green",
+            "limit": 5
+          }
+        }
+      ]
+    },
+    {
+      "snapshot_id": "ops_20261112_rojas",
+      "status": "complete",
+      "config": {
+        "query": "in=rojas and in=oscar",
+        "max_records": 25,
+        "page_size": 25,
+        "max_requests": 100,
+        "timeout_seconds": 30.0,
+        "request_interval_seconds": 6.0,
+        "max_retries": 2,
+        "max_retry_wait_seconds": 60.0
+      },
+      "record_count": 25,
+      "files": {
+        "page_0001.xml": "0ee4306381a03e3a059edf74fcda6b276959121b4cedc26877cd3ce1c052ddec",
+        "patents.jsonl": "5b3fc2b13bd07bd796597c6dc7d510af0988d9be8d9d8242b80f2be2a4a04df8"
+      },
+      "requests": [
+        {
+          "operation": "token",
+          "status": 200,
+          "attempt": 1
+        },
+        {
+          "operation": "search",
+          "status": 200,
+          "attempt": 1,
+          "search_throttle": {
+            "state": "green",
+            "limit": 5
+          }
+        }
+      ]
+    }
+  ]
+}

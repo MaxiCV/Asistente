@@ -14,7 +14,7 @@ from app.contracts import EmbeddingConfig
 from app.core.config import ROOT, Settings
 from app.core.files import atomic_json, sha256_file
 from app.embeddings.local import MODEL_FILES, verify_model_files
-from app.indexing.build import validate_collections, writer_lock
+from app.indexing.build import validate_collections, validate_patent_provenance, writer_lock
 from app.ingestion.snapshot import read_snapshot
 
 
@@ -47,6 +47,7 @@ def backup(client, settings, config, destination: Path, review_csv: Path):
         if client.info().version != "1.20.0":
             raise ValueError("Se requiere Qdrant 1.20.0")
         validate_collections(client, manifest)
+        validate_patent_provenance(client, manifest, settings.data_dir)
         if sha256_file(review_csv) != manifest.review_csv_sha256:
             raise ValueError("CSV distinto del usado para construir la generación")
         folder = settings.data_dir / "generations" / pinned.generation_id
@@ -69,6 +70,21 @@ def backup(client, settings, config, destination: Path, review_csv: Path):
                 copy(folder / filename, f"data/generations/{pinned.generation_id}/{filename}")
         for filename in ("manifest.json", "works.jsonl", "requests.jsonl", "quarantine.jsonl"):
             copy(snapshot / filename, f"data/snapshots/{manifest.snapshot_id}/{filename}")
+        if manifest.patent_selection_sha256:
+            from app.ingestion.patent_corpus import PatentSelectionFile, select_patents
+
+            selection = folder / "patent_selection.json"
+            if sha256_file(selection) != manifest.patent_selection_sha256:
+                raise ValueError("Selección de patentes alterada")
+            select_patents(settings.data_dir, selection)
+            copy(selection, f"data/generations/{pinned.generation_id}/patent_selection.json")
+            rows = PatentSelectionFile.model_validate_json(selection.read_text("utf-8"))
+            for snapshot_id in sorted({r.snapshot_id for r in rows.records}):
+                relative = f"data/patents/snapshots/{snapshot_id}"
+                patent_dir = settings.data_dir / "patents/snapshots" / snapshot_id
+                pm = json.loads((patent_dir / "manifest.json").read_text("utf-8"))
+                for filename in ["manifest.json", *pm["files"]]:
+                    copy(patent_dir / filename, f"{relative}/{filename}")
         for filename in [*MODEL_FILES, "download.json"]:
             if (model / filename).is_file():
                 copy(
@@ -80,6 +96,8 @@ def backup(client, settings, config, destination: Path, review_csv: Path):
         copy(review_csv, "corpus/revision_corpus.csv")
         for filename in ("embedding.json", "openalex.json"):
             copy(ROOT / "config" / filename, f"config/{filename}")
+        if manifest.patent_selection_sha256:
+            copy(ROOT / "config/epo_ops.json", "config/epo_ops.json")
         for filename in ("pyproject.toml", "uv.lock", "compose.yaml"):
             copy(ROOT / filename, filename)
         snapshots = {}
@@ -164,6 +182,21 @@ def verify_backup(source: Path):
         raise ValueError("Snapshot de respaldo incompatible")
     if sha256_file(source / "corpus/revision_corpus.csv") != manifest.review_csv_sha256:
         raise ValueError("CSV de respaldo incompatible")
+    if manifest.patent_selection_sha256:
+        from app.ingestion.patent_corpus import PatentSelectionFile, select_patents
+
+        selection = source / "data/generations" / manifest.generation_id / "patent_selection.json"
+        if sha256_file(selection) != manifest.patent_selection_sha256:
+            raise ValueError("Selección de patentes incompatible")
+        select_patents(source / "data", selection)
+        rows = PatentSelectionFile.model_validate_json(selection.read_text("utf-8"))
+        required.add(f"data/generations/{manifest.generation_id}/patent_selection.json")
+        for snapshot_id in {r.snapshot_id for r in rows.records}:
+            relative = f"data/patents/snapshots/{snapshot_id}"
+            pm = json.loads((source / relative / "manifest.json").read_text("utf-8"))
+            required.update(f"{relative}/{name}" for name in ["manifest.json", *pm["files"]])
+        if not required.issubset(record["files"]):
+            raise ValueError("Respaldo de patentes incompleto")
     return record, manifest
 
 
@@ -190,6 +223,7 @@ def restore(client, qdrant_url: str, source: Path, destination: Path):
                 )
                 response.raise_for_status()
     validate_collections(client, manifest)
+    validate_patent_provenance(client, manifest, destination / "data")
     client.update_collection_aliases(
         [
             models.CreateAliasOperation(

@@ -1,0 +1,19 @@
+{
+  "additionalProperties": false,
+  "description": "Errores de validación de entrada emitidos por FastAPI.",
+  "properties": {
+    "detail": {
+      "items": {
+        "additionalProperties": true,
+        "type": "object"
+      },
+      "title": "Detail",
+      "type": "array"
+    }
+  },
+  "required": [
+    "detail"
+  ],
+  "title": "RequestValidationResponse",
+  "type": "object"
+}

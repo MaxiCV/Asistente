@@ -1,0 +1,98 @@
+{
+  "additionalProperties": false,
+  "properties": {
+    "marker": {
+      "maximum": 10,
+      "minimum": 1,
+      "title": "Marker",
+      "type": "integer"
+    },
+    "document_id": {
+      "format": "uuid",
+      "title": "Document Id",
+      "type": "string"
+    },
+    "passage_id": {
+      "format": "uuid",
+      "title": "Passage Id",
+      "type": "string"
+    },
+    "title": {
+      "minLength": 1,
+      "title": "Title",
+      "type": "string"
+    },
+    "document_type": {
+      "enum": [
+        "publication",
+        "patent"
+      ],
+      "title": "Document Type",
+      "type": "string"
+    },
+    "content_level": {
+      "enum": [
+        "abstract",
+        "metadata"
+      ],
+      "title": "Content Level",
+      "type": "string"
+    },
+    "source_url": {
+      "format": "uri",
+      "maxLength": 2083,
+      "minLength": 1,
+      "title": "Source Url",
+      "type": "string"
+    },
+    "doi": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Doi"
+    },
+    "publication_id": {
+      "anyOf": [
+        {
+          "minLength": 1,
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Publication Id"
+    },
+    "publication_date": {
+      "anyOf": [
+        {
+          "format": "date",
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Publication Date"
+    }
+  },
+  "required": [
+    "marker",
+    "document_id",
+    "passage_id",
+    "title",
+    "document_type",
+    "content_level",
+    "source_url"
+  ],
+  "title": "Citation",
+  "type": "object"
+}

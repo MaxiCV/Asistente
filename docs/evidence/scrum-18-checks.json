@@ -1,0 +1,35 @@
+{
+  "scope": "SCRUM-18 functional verification; quality evaluation deferred to S3",
+  "python": [
+    {
+      "suite": "unit",
+      "tests": 173,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "seconds": 71.081,
+      "timestamp": "2026-11-15T22:41:46.911358-03:00"
+    },
+    {
+      "suite": "integration",
+      "tests": 34,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "seconds": 117.812,
+      "timestamp": "2026-11-15T22:41:46.911358-03:00"
+    }
+  ],
+  "playwright": {
+    "passed": 6,
+    "browser": "msedge",
+    "mocked_api": true
+  },
+  "ruff": "passed",
+  "frontend_build": "passed",
+  "exported_json_contracts": 38,
+  "schema_export_stable": true,
+  "real_provider_cases": 6,
+  "real_browser_report": "scrum-18-browser.json",
+  "quality_evaluated": false
+}

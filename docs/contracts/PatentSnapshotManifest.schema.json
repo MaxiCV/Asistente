@@ -1,0 +1,209 @@
+{
+  "$defs": {
+    "PatentFetchConfig": {
+      "additionalProperties": false,
+      "properties": {
+        "query": {
+          "minLength": 1,
+          "title": "Query",
+          "type": "string"
+        },
+        "max_records": {
+          "default": 25,
+          "maximum": 2000,
+          "minimum": 1,
+          "title": "Max Records",
+          "type": "integer"
+        },
+        "page_size": {
+          "default": 25,
+          "maximum": 100,
+          "minimum": 1,
+          "title": "Page Size",
+          "type": "integer"
+        },
+        "max_requests": {
+          "default": 100,
+          "maximum": 1000,
+          "minimum": 1,
+          "title": "Max Requests",
+          "type": "integer"
+        },
+        "timeout_seconds": {
+          "default": 30,
+          "exclusiveMinimum": 0,
+          "maximum": 120,
+          "title": "Timeout Seconds",
+          "type": "number"
+        },
+        "request_interval_seconds": {
+          "default": 6,
+          "maximum": 60,
+          "minimum": 6,
+          "title": "Request Interval Seconds",
+          "type": "number"
+        },
+        "max_retries": {
+          "default": 2,
+          "maximum": 5,
+          "minimum": 0,
+          "title": "Max Retries",
+          "type": "integer"
+        },
+        "max_retry_wait_seconds": {
+          "default": 60,
+          "maximum": 60,
+          "minimum": 1,
+          "title": "Max Retry Wait Seconds",
+          "type": "number"
+        }
+      },
+      "required": [
+        "query"
+      ],
+      "title": "PatentFetchConfig",
+      "type": "object"
+    }
+  },
+  "additionalProperties": false,
+  "properties": {
+    "schema_version": {
+      "const": 1,
+      "default": 1,
+      "title": "Schema Version",
+      "type": "integer"
+    },
+    "source": {
+      "const": "epo_ops",
+      "default": "epo_ops",
+      "title": "Source",
+      "type": "string"
+    },
+    "snapshot_id": {
+      "pattern": "^[a-z0-9][a-z0-9_-]{0,63}$",
+      "title": "Snapshot Id",
+      "type": "string"
+    },
+    "status": {
+      "enum": [
+        "complete",
+        "incomplete"
+      ],
+      "title": "Status",
+      "type": "string"
+    },
+    "started_at": {
+      "anyOf": [
+        {
+          "format": "date-time",
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Started At"
+    },
+    "finished_at": {
+      "anyOf": [
+        {
+          "format": "date-time",
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Finished At"
+    },
+    "config": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/PatentFetchConfig"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null
+    },
+    "record_count": {
+      "minimum": 0,
+      "title": "Record Count",
+      "type": "integer"
+    },
+    "duplicate_observations": {
+      "default": 0,
+      "minimum": 0,
+      "title": "Duplicate Observations",
+      "type": "integer"
+    },
+    "files": {
+      "additionalProperties": {
+        "pattern": "^[0-9a-f]{64}$",
+        "type": "string"
+      },
+      "title": "Files",
+      "type": "object"
+    },
+    "error_code": {
+      "anyOf": [
+        {
+          "minLength": 1,
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Error Code"
+    },
+    "requests": {
+      "items": {
+        "additionalProperties": true,
+        "type": "object"
+      },
+      "title": "Requests",
+      "type": "array"
+    },
+    "total_results_reported": {
+      "anyOf": [
+        {
+          "minimum": 0,
+          "type": "integer"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Total Results Reported"
+    },
+    "stop_reason": {
+      "anyOf": [
+        {
+          "enum": [
+            "exhausted",
+            "record_limit"
+          ],
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Stop Reason"
+    }
+  },
+  "required": [
+    "snapshot_id",
+    "status",
+    "record_count"
+  ],
+  "title": "PatentSnapshotManifest",
+  "type": "object"
+}

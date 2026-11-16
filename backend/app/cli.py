@@ -30,6 +30,9 @@ def main() -> int:
     fetch.add_argument("snapshot_id")
     fetch.add_argument("--config", type=Path, default=ROOT / "config/openalex.json")
     fetch.add_argument("--cutoff", type=date.fromisoformat, required=True)
+    patents = commands.add_parser("fetch-patents", help="Capturar bibliografía EPO OPS sin indexar")
+    patents.add_argument("snapshot_id")
+    patents.add_argument("--config", type=Path, default=ROOT / "config/epo_ops.json")
     draft = commands.add_parser(
         "prepare-review", help="Crear un CSV nuevo con decisiones pendientes"
     )
@@ -42,6 +45,8 @@ def main() -> int:
     normalize.add_argument("--csv", type=Path)
     build = commands.add_parser("build", help="Construir una generación nueva desde snapshot y CSV")
     build.add_argument("generation")
+    build.add_argument("--patent-selection", type=Path, help="Selección revisada de patentes OPS")
+    build.add_argument("--bm25", action="store_true", help="Añadir BM25 nativo e IDF")
     build.add_argument("--snapshot", type=Path, required=True)
     build.add_argument("--csv", type=Path, default=ROOT / "corpus/revision_corpus.csv")
     for command in ("publish", "rollback"):
@@ -98,6 +103,12 @@ def main() -> int:
             with qdrant_connection(settings.qdrant_url, timeout=10) as client:
                 names = create_candidate_collections(client, args.generation, config)
             result = {"candidate_collections": names, "published": False}
+        elif args.command == "fetch-patents":
+            from app.contracts import PatentFetchConfig
+            from app.ingestion.epo_ops import fetch_patents
+
+            patent_config = PatentFetchConfig.model_validate_json(args.config.read_text("utf-8"))
+            result = fetch_patents(settings, patent_config, args.snapshot_id)
         elif args.command == "fetch":
             from app.contracts import FetchConfig
             from app.ingestion.openalex import fetch_snapshot
@@ -119,12 +130,21 @@ def main() -> int:
 
             _, result = select_documents(args.snapshot, args.csv)
         elif args.command == "build":
+            from app.contracts import Bm25Config
             from app.embeddings.local import LocalEncoder
             from app.indexing.build import build_generation
 
             with qdrant_connection(settings.qdrant_url, timeout=60) as client:
                 result = build_generation(
-                    client, settings, config, args.generation, args.snapshot, args.csv, LocalEncoder
+                    client,
+                    settings,
+                    config,
+                    args.generation,
+                    args.snapshot,
+                    args.csv,
+                    LocalEncoder,
+                    bm25=Bm25Config() if args.bm25 else None,
+                    patent_selection=args.patent_selection,
                 )
         elif args.command in ("publish", "rollback"):
             from app.indexing.publish import publish_generation

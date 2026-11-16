@@ -1,0 +1,10 @@
+{
+  "query": "ta=\"fall detection\"",
+  "max_records": 25,
+  "page_size": 25,
+  "max_requests": 100,
+  "timeout_seconds": 30,
+  "request_interval_seconds": 6,
+  "max_retries": 2,
+  "max_retry_wait_seconds": 60
+}

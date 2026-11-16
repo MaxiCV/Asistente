@@ -19,6 +19,7 @@ def make_passages(document: Document, encoder, config: ChunkingConfig, config_ha
         return Passage(
             passage_id=passage_id(document.document_id, digest, config_hash, position),
             document_id=document.document_id,
+            document_type=document.document_type,
             position=position,
             text=text,
             token_count=count(text),

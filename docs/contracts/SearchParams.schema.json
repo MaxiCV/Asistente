@@ -1,24 +1,21 @@
 {
   "additionalProperties": false,
   "properties": {
+    "mode": {
+      "default": "semantic",
+      "enum": [
+        "semantic",
+        "lexical",
+        "hybrid"
+      ],
+      "title": "Mode",
+      "type": "string"
+    },
     "q": {
       "maxLength": 300,
       "minLength": 1,
       "title": "Q",
       "type": "string"
-    },
-    "page": {
-      "default": 1,
-      "minimum": 1,
-      "title": "Page",
-      "type": "integer"
-    },
-    "page_size": {
-      "default": 20,
-      "maximum": 100,
-      "minimum": 1,
-      "title": "Page Size",
-      "type": "integer"
     },
     "date_from": {
       "anyOf": [
@@ -47,8 +44,12 @@
       "title": "Date To"
     },
     "document_type": {
-      "const": "publication",
       "default": "publication",
+      "enum": [
+        "publication",
+        "patent",
+        "all"
+      ],
       "title": "Document Type",
       "type": "string"
     },
@@ -77,6 +78,19 @@
       ],
       "default": null,
       "title": "Index Generation"
+    },
+    "page": {
+      "default": 1,
+      "minimum": 1,
+      "title": "Page",
+      "type": "integer"
+    },
+    "page_size": {
+      "default": 20,
+      "maximum": 100,
+      "minimum": 1,
+      "title": "Page Size",
+      "type": "integer"
     }
   },
   "required": [

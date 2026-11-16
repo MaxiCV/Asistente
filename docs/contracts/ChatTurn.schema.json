@@ -1,0 +1,413 @@
+{
+  "$defs": {
+    "ChatRequest": {
+      "additionalProperties": false,
+      "properties": {
+        "request_id": {
+          "format": "uuid",
+          "title": "Request Id",
+          "type": "string"
+        },
+        "question": {
+          "maxLength": 1000,
+          "minLength": 1,
+          "title": "Question",
+          "type": "string"
+        },
+        "conversation_id": {
+          "anyOf": [
+            {
+              "format": "uuid",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Conversation Id"
+        },
+        "mode": {
+          "anyOf": [
+            {
+              "enum": [
+                "semantic",
+                "lexical",
+                "hybrid"
+              ],
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Mode"
+        },
+        "document_type": {
+          "default": "all",
+          "enum": [
+            "publication",
+            "patent",
+            "all"
+          ],
+          "title": "Document Type",
+          "type": "string"
+        },
+        "date_from": {
+          "anyOf": [
+            {
+              "format": "date",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Date From"
+        },
+        "date_to": {
+          "anyOf": [
+            {
+              "format": "date",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Date To"
+        },
+        "publication_type": {
+          "anyOf": [
+            {
+              "minLength": 1,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Publication Type"
+        },
+        "index_generation": {
+          "anyOf": [
+            {
+              "pattern": "^[a-z0-9][a-z0-9_-]{0,63}$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Index Generation"
+        }
+      },
+      "required": [
+        "request_id",
+        "question"
+      ],
+      "title": "ChatRequest",
+      "type": "object"
+    },
+    "ChatResponse": {
+      "additionalProperties": false,
+      "properties": {
+        "conversation_id": {
+          "format": "uuid",
+          "title": "Conversation Id",
+          "type": "string"
+        },
+        "turn_id": {
+          "format": "uuid",
+          "title": "Turn Id",
+          "type": "string"
+        },
+        "turn_index": {
+          "minimum": 1,
+          "title": "Turn Index",
+          "type": "integer"
+        },
+        "index_generation": {
+          "pattern": "^[a-z0-9][a-z0-9_-]{0,63}$",
+          "title": "Index Generation",
+          "type": "string"
+        },
+        "mode": {
+          "enum": [
+            "semantic",
+            "lexical",
+            "hybrid"
+          ],
+          "title": "Mode",
+          "type": "string"
+        },
+        "status": {
+          "enum": [
+            "answered",
+            "insufficient_evidence"
+          ],
+          "title": "Status",
+          "type": "string"
+        },
+        "evidence_level": {
+          "enum": [
+            "abstract",
+            "metadata_only",
+            "mixed",
+            "none"
+          ],
+          "title": "Evidence Level",
+          "type": "string"
+        },
+        "answer": {
+          "minLength": 1,
+          "title": "Answer",
+          "type": "string"
+        },
+        "citations": {
+          "items": {
+            "$ref": "#/$defs/Citation"
+          },
+          "title": "Citations",
+          "type": "array"
+        },
+        "context": {
+          "items": {
+            "$ref": "#/$defs/ContextPassage"
+          },
+          "title": "Context",
+          "type": "array"
+        },
+        "model": {
+          "anyOf": [
+            {
+              "minLength": 1,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Model"
+        },
+        "created_at": {
+          "format": "date-time",
+          "title": "Created At",
+          "type": "string"
+        }
+      },
+      "required": [
+        "conversation_id",
+        "turn_id",
+        "turn_index",
+        "index_generation",
+        "mode",
+        "status",
+        "evidence_level",
+        "answer",
+        "citations",
+        "context",
+        "model",
+        "created_at"
+      ],
+      "title": "ChatResponse",
+      "type": "object"
+    },
+    "Citation": {
+      "additionalProperties": false,
+      "properties": {
+        "marker": {
+          "maximum": 10,
+          "minimum": 1,
+          "title": "Marker",
+          "type": "integer"
+        },
+        "document_id": {
+          "format": "uuid",
+          "title": "Document Id",
+          "type": "string"
+        },
+        "passage_id": {
+          "format": "uuid",
+          "title": "Passage Id",
+          "type": "string"
+        },
+        "title": {
+          "minLength": 1,
+          "title": "Title",
+          "type": "string"
+        },
+        "document_type": {
+          "enum": [
+            "publication",
+            "patent"
+          ],
+          "title": "Document Type",
+          "type": "string"
+        },
+        "content_level": {
+          "enum": [
+            "abstract",
+            "metadata"
+          ],
+          "title": "Content Level",
+          "type": "string"
+        },
+        "source_url": {
+          "format": "uri",
+          "maxLength": 2083,
+          "minLength": 1,
+          "title": "Source Url",
+          "type": "string"
+        },
+        "doi": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Doi"
+        },
+        "publication_id": {
+          "anyOf": [
+            {
+              "minLength": 1,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Publication Id"
+        },
+        "publication_date": {
+          "anyOf": [
+            {
+              "format": "date",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Publication Date"
+        }
+      },
+      "required": [
+        "marker",
+        "document_id",
+        "passage_id",
+        "title",
+        "document_type",
+        "content_level",
+        "source_url"
+      ],
+      "title": "Citation",
+      "type": "object"
+    },
+    "ContextPassage": {
+      "additionalProperties": false,
+      "properties": {
+        "rank": {
+          "maximum": 10,
+          "minimum": 1,
+          "title": "Rank",
+          "type": "integer"
+        },
+        "document_id": {
+          "format": "uuid",
+          "title": "Document Id",
+          "type": "string"
+        },
+        "passage_id": {
+          "format": "uuid",
+          "title": "Passage Id",
+          "type": "string"
+        },
+        "text_sha256": {
+          "pattern": "^[0-9a-f]{64}$",
+          "title": "Text Sha256",
+          "type": "string"
+        },
+        "score": {
+          "title": "Score",
+          "type": "number"
+        },
+        "content_level": {
+          "enum": [
+            "abstract",
+            "metadata"
+          ],
+          "title": "Content Level",
+          "type": "string"
+        },
+        "cited": {
+          "title": "Cited",
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "rank",
+        "document_id",
+        "passage_id",
+        "text_sha256",
+        "score",
+        "content_level",
+        "cited"
+      ],
+      "title": "ContextPassage",
+      "type": "object"
+    }
+  },
+  "additionalProperties": false,
+  "properties": {
+    "schema_version": {
+      "const": 1,
+      "default": 1,
+      "title": "Schema Version",
+      "type": "integer"
+    },
+    "request": {
+      "$ref": "#/$defs/ChatRequest"
+    },
+    "request_sha256": {
+      "pattern": "^[0-9a-f]{64}$",
+      "title": "Request Sha256",
+      "type": "string"
+    },
+    "response": {
+      "$ref": "#/$defs/ChatResponse"
+    },
+    "rejection_reason": {
+      "anyOf": [
+        {
+          "minLength": 1,
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Rejection Reason"
+    }
+  },
+  "required": [
+    "request",
+    "request_sha256",
+    "response"
+  ],
+  "title": "ChatTurn",
+  "type": "object"
+}

@@ -18,6 +18,7 @@ services:
       HF_HUB_OFFLINE: "1"
       TRANSFORMERS_OFFLINE: "1"
       EMBEDDING_DEVICE: cpu
+      GEMINI_API_KEY: ${GEMINI_API_KEY:-${GOOGLE_API_KEY:-}}
     ports:
       - "127.0.0.1:8000:8000"
     volumes:

@@ -1,0 +1,33 @@
+{
+  "additionalProperties": false,
+  "properties": {
+    "snapshot_id": {
+      "pattern": "^[a-z0-9][a-z0-9_-]{0,63}$",
+      "title": "Snapshot Id",
+      "type": "string"
+    },
+    "publication_id": {
+      "minLength": 1,
+      "title": "Publication Id",
+      "type": "string"
+    },
+    "reason": {
+      "minLength": 1,
+      "title": "Reason",
+      "type": "string"
+    },
+    "scope": {
+      "minLength": 1,
+      "title": "Scope",
+      "type": "string"
+    }
+  },
+  "required": [
+    "snapshot_id",
+    "publication_id",
+    "reason",
+    "scope"
+  ],
+  "title": "PatentSelection",
+  "type": "object"
+}

@@ -1,0 +1,53 @@
+{
+  "additionalProperties": false,
+  "properties": {
+    "rank": {
+      "maximum": 10,
+      "minimum": 1,
+      "title": "Rank",
+      "type": "integer"
+    },
+    "document_id": {
+      "format": "uuid",
+      "title": "Document Id",
+      "type": "string"
+    },
+    "passage_id": {
+      "format": "uuid",
+      "title": "Passage Id",
+      "type": "string"
+    },
+    "text_sha256": {
+      "pattern": "^[0-9a-f]{64}$",
+      "title": "Text Sha256",
+      "type": "string"
+    },
+    "score": {
+      "title": "Score",
+      "type": "number"
+    },
+    "content_level": {
+      "enum": [
+        "abstract",
+        "metadata"
+      ],
+      "title": "Content Level",
+      "type": "string"
+    },
+    "cited": {
+      "title": "Cited",
+      "type": "boolean"
+    }
+  },
+  "required": [
+    "rank",
+    "document_id",
+    "passage_id",
+    "text_sha256",
+    "score",
+    "content_level",
+    "cited"
+  ],
+  "title": "ContextPassage",
+  "type": "object"
+}

@@ -1,0 +1,10 @@
+{
+  "records": [
+    {"snapshot_id":"ops_20261112_falls","publication_id":"US.20260255015.A1","scope":"deteccion_caidas","reason":"Resumen: radar mmWave en habitación y módulo de aprendizaje automático que determina características y acciones; título incluye detección de caídas."},
+    {"snapshot_id":"ops_20261112_falls","publication_id":"CN.122531182.A","scope":"deteccion_caidas","reason":"Resumen: smartwatch con red neuronal ligera, sensores inerciales y presión; confirma caídas y reduce falsas alarmas."},
+    {"snapshot_id":"ops_20261112_falls","publication_id":"CN.122511023.A","scope":"deteccion_caidas_hogar","reason":"Resumen: reconocimiento de postura, 17 puntos articulares y red convolucional temporal; menciona seguridad de personas mayores en el hogar."},
+    {"snapshot_id":"ops_20261112_falls","publication_id":"CN.122531109.A","scope":"deteccion_caidas","reason":"Resumen: vídeo humano, encoder multimodal y clasificador ajustado para predecir probabilidad de caída."},
+    {"snapshot_id":"ops_20261112_falls","publication_id":"WO.2026226852.A1","scope":"contexto_cuidado","reason":"Resumen: fusión de sensores de cama/silla, infrarrojo y cámaras para detectar caídas en espacios de cuidado. Contexto tecnológico; no se afirma ML no descrito."},
+    {"snapshot_id":"ops_20261112_rojas","publication_id":"US.2016189026.A1","scope":"solicitud_usuario_fuera_de_tema","reason":"Solicitada por el usuario: Running Time Prediction Algorithm for WAND Queries. OPS identifica a ROJAS OSCAR, MARIN MAURICIO y GIL-COSTA VERÓNICA como inventores y UNIVERSIDAD DE SANTIAGO DE CHILE como solicitante. Caso de recuperación de información, ajeno a detección de caídas; A1 es publicación de solicitud, no prueba de concesión."}
+  ]
+}

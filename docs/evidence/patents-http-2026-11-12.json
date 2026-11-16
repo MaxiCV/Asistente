@@ -1,0 +1,62 @@
+{
+  "generation": "s17_20261112_patents",
+  "documents": 106,
+  "patents": 6,
+  "checks": [
+    {
+      "mode": "semantic",
+      "matched": 6,
+      "wand_id": "76ec84d2-02d4-5ecd-a097-4e7a6d4dba23"
+    },
+    {
+      "mode": "lexical",
+      "matched": 1,
+      "wand_id": "76ec84d2-02d4-5ecd-a097-4e7a6d4dba23"
+    },
+    {
+      "mode": "hybrid",
+      "matched": 6,
+      "wand_id": "76ec84d2-02d4-5ecd-a097-4e7a6d4dba23"
+    }
+  ],
+  "wand_detail": {
+    "schema_version": 1,
+    "document_id": "76ec84d2-02d4-5ecd-a097-4e7a6d4dba23",
+    "document_type": "patent",
+    "publication_type": "patent",
+    "title": "Running Time Prediction Algorithm for WAND Queries",
+    "authors": [
+      {
+        "name": "MARIN MAURICIO",
+        "orcid": null
+      },
+      {
+        "name": "GIL-COSTA VERÓNICA",
+        "orcid": null
+      },
+      {
+        "name": "ROJAS OSCAR",
+        "orcid": null
+      }
+    ],
+    "publication_date": "2016-06-30",
+    "language": "en",
+    "doi": null,
+    "source_url": "https://worldwide.espacenet.com/patent/search?q=pn%3DUS2016189026A1",
+    "abstract": "A prediction method for estimating the running time of WAND queries executed on a Web search engine which includes an off-line component using the Discrete Fourier Transform to models the index as a collection of signals to obtain characteristic vectors for query terms and an on-line feed-forward neural network with back-propagation to estimate the time required to process the incoming queries. The DFT is used to obtain values for six characteristics of the posting lists associated with the query terms. These characteristics are used to train a neuronal network which is used to predict the query execution time.",
+    "content_level": "abstract",
+    "identities": [
+      {
+        "source": "epo_ops",
+        "publication_id": "US.2016189026.A1",
+        "snapshot_id": "ops_20261112_rojas",
+        "retrieved_at": "2026-11-13T02:10:43.367114Z",
+        "applicants": [
+          "UNIVERSIDAD DE SANTIAGO DE CHILE"
+        ]
+      }
+    ],
+    "technology": "ND",
+    "evidence": "ND"
+  }
+}

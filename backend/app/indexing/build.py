@@ -11,7 +11,8 @@ from qdrant_client import models
 
 from app.catalog.generations import collection_names, create_candidate_collections
 from app.contracts import ChunkingConfig, Document, GenerationManifest, Passage, RunRecord
-from app.core.files import atomic_json
+from app.core.files import atomic_json, sha256_file
+from app.embeddings.bm25 import bm25_document, check_bm25_server, validate_bm25_collection
 from app.indexing.chunking import make_passages
 from app.ingestion.normalize import select_documents
 
@@ -60,6 +61,8 @@ def all_points(client, collection, *, vectors=False):
 
 
 def validate_collections(client, manifest, documents=None, passages=None):
+    if manifest.bm25:
+        validate_bm25_collection(client, manifest.passages_collection)
     doc_points = list(all_points(client, manifest.documents_collection))
     passage_points = list(all_points(client, manifest.passages_collection, vectors=True))
     if len(doc_points) != manifest.document_count or len(passage_points) != manifest.passage_count:
@@ -76,6 +79,10 @@ def validate_collections(client, manifest, documents=None, passages=None):
         catalog[str(point.id)] = document
     if sum(d.abstract is not None for d in catalog.values()) != manifest.abstract_count:
         raise ValueError("Cobertura de resúmenes incoherente")
+    if any(d.document_type == "patent" for d in catalog.values()) != (
+        manifest.patent_selection_sha256 is not None
+    ):
+        raise ValueError("Patentes y selección de procedencia incoherentes")
     linked = set()
     for point in passage_points:
         payload = point.payload or {}
@@ -92,6 +99,15 @@ def validate_collections(client, manifest, documents=None, passages=None):
             raise ValueError("Payload de fragmento incoherente")
         linked.add(payload.get("document_id"))
         vector = np.asarray((point.vector or {}).get("dense", []))
+        if manifest.bm25:
+            sparse = (point.vector or {}).get("bm25")
+            if (
+                not isinstance(sparse, models.SparseVector)
+                or len(sparse.indices) != len(sparse.values)
+                or len(sparse.indices) != len(set(sparse.indices))
+                or not np.isfinite(sparse.values).all()
+            ):
+                raise ValueError("Vector BM25 ausente o inválido")
         if vector.shape != (manifest.embedding.dimensions,) or not np.isfinite(vector).all():
             raise ValueError("Vector inválido en colección candidata")
         if not np.isclose(np.linalg.norm(vector), 1, atol=1e-4):
@@ -108,7 +124,40 @@ def validate_collections(client, manifest, documents=None, passages=None):
             raise ValueError("Fragmentos diferentes después de escribir")
 
 
-def build_generation(client, settings, embedding, generation, snapshot, csv_path, encoder_factory):
+def validate_patent_provenance(client, manifest, data_dir):
+    if manifest.patent_selection_sha256 is None:
+        return
+    from app.ingestion.patent_corpus import select_patents
+
+    selection = data_dir / "generations" / manifest.generation_id / "patent_selection.json"
+    if sha256_file(selection) != manifest.patent_selection_sha256:
+        raise ValueError("Selección de patentes alterada")
+    expected = {
+        str(d.document_id): d.model_dump(mode="json") for d in select_patents(data_dir, selection)
+    }
+    actual = {
+        str(p.id): (p.payload or {}).get("document")
+        for p in all_points(client, manifest.documents_collection)
+        if (p.payload or {}).get("document_type") == "patent"
+    }
+    if actual != expected:
+        raise ValueError("Catálogo de patentes diferente de la selección de procedencia")
+
+
+def build_generation(
+    client,
+    settings,
+    embedding,
+    generation,
+    snapshot,
+    csv_path,
+    encoder_factory,
+    *,
+    bm25=None,
+    patent_selection=None,
+):
+    if bm25:
+        check_bm25_server(client, bm25)
     names = collection_names(generation)
     with writer_lock(settings.data_dir):
         if any(client.collection_exists(name) for name in names):
@@ -126,6 +175,12 @@ def build_generation(client, settings, embedding, generation, snapshot, csv_path
         atomic_json(run_path, run.model_dump(mode="json"))
         try:
             documents, selection = select_documents(snapshot, csv_path)
+            if patent_selection:
+                from app.ingestion.patent_corpus import select_patents
+
+                documents += select_patents(settings.data_dir, patent_selection)
+                (target / "patent_selection.json").write_bytes(patent_selection.read_bytes())
+                selection["abstract_count"] = sum(d.abstract is not None for d in documents)
             run.snapshot_id = selection["snapshot_id"]
             chunking = ChunkingConfig()
             config = {
@@ -139,7 +194,7 @@ def build_generation(client, settings, embedding, generation, snapshot, csv_path
             passages = [
                 p for doc in documents for p in make_passages(doc, encoder, chunking, config_hash)
             ]
-            create_candidate_collections(client, generation, embedding)
+            create_candidate_collections(client, generation, embedding, bm25=bool(bm25))
             for first in range(0, len(documents), 64):
                 client.upsert(
                     names[0],
@@ -167,7 +222,8 @@ def build_generation(client, settings, embedding, generation, snapshot, csv_path
                     [
                         models.PointStruct(
                             id=str(p.passage_id),
-                            vector={"dense": vector.tolist()},
+                            vector={"dense": vector.tolist()}
+                            | ({"bm25": bm25_document(p.text, bm25)} if bm25 else {}),
                             payload=filter_payload(p) | {"passage": p.model_dump(mode="json")},
                         )
                         for p, vector in zip(batch, vectors, strict=True)
@@ -186,6 +242,10 @@ def build_generation(client, settings, embedding, generation, snapshot, csv_path
                 config_sha256=config_hash,
                 embedding=embedding,
                 chunking=chunking,
+                bm25=bm25,
+                patent_selection_sha256=sha256_file(target / "patent_selection.json")
+                if patent_selection
+                else None,
                 document_count=len(documents),
                 passage_count=len(passages),
                 abstract_count=selection["abstract_count"],

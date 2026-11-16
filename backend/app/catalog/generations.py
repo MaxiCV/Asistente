@@ -114,6 +114,8 @@ def create_candidate_collections(
     client: QdrantClient,
     generation: str,
     embedding: EmbeddingConfig,
+    *,
+    bm25=False,
 ) -> tuple[str, str]:
     """Solo CLI. Repetible para candidatas; nunca altera colecciones con alias."""
     names = collection_names(generation)
@@ -124,6 +126,11 @@ def create_candidate_collections(
         if not client.collection_exists(name):
             client.create_collection(
                 collection_name=name,
+                sparse_vectors_config={
+                    "bm25": models.SparseVectorParams(modifier=models.Modifier.IDF)
+                }
+                if bm25 and name == names[1]
+                else None,
                 vectors_config={}
                 if name == names[0]
                 else {
@@ -134,6 +141,10 @@ def create_candidate_collections(
                 },
             )
         info = client.get_collection(name)
+        if bm25 and name == names[1]:
+            from app.embeddings.bm25 import validate_bm25_collection
+
+            validate_bm25_collection(client, name)
         expected = (
             {}
             if name == names[0]

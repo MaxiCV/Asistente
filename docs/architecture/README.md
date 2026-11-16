@@ -1,19 +1,21 @@
-# Arquitectura de los incrementos SCRUM-10 a SCRUM-14
+# Arquitectura de los incrementos SCRUM-10 a SCRUM-18
 
-El [modelo C4](workspace.dsl) conserva la arquitectura aprobada: web React/TypeScript, API FastAPI, CLI Python separada, Qdrant como única base de datos y archivos persistentes. Los componentes de Sprint 2 y 3 son diseño futuro, no funcionalidades presentes.
+El [modelo C4](workspace.dsl) conserva la arquitectura aprobada: web React/TypeScript, API FastAPI, CLI Python separada, Qdrant como única base de datos y archivos persistentes. Patentes, BM25/RRF y chat de Sprint 2 están implementados; la evaluación de Sprint 3 sigue pendiente.
 
-Revisión del 8 de noviembre de 2026: cinco contenedores C4 implementados y un sexto futuro para evaluación offline. Compose ejecuta tres servicios; API y CLI son procesos distintos con módulos compartidos. [Comprobaciones y pendientes](../revision-documentacion-2026-11-08.md).
+Revisión del 15 de noviembre de 2026: cinco contenedores C4 implementados y un sexto futuro para evaluación offline. Compose ejecuta tres servicios; API y CLI son procesos distintos con módulos compartidos. [Comprobaciones y pendientes del chat](../implementation-scrum-18.md).
 
 ## Límites de responsabilidad
 
 | Proceso | Lee | Escribe |
 | --- | --- | --- |
-| Web | API local; conserva la generación en paginación y detalle | Estado de interfaz |
-| API | Colecciones y manifiestos publicados, pesos locales | Ningún dato del corpus |
-| CLI | OpenAlex durante captura; snapshots y CSV durante construcción | Archivos, colecciones candidatas y publicación/rollback por alias |
+| Web | API local; conserva generación en búsqueda y conversación | Estado y envío pendiente en sessionStorage |
+| API | Corpus publicado, pesos e historial; Gemini para respuestas | Solo `chat_turns`, separado del corpus |
+| CLI | OpenAlex/EPO OPS durante captura; snapshots y selecciones durante construcción | Archivos, colecciones candidatas y publicación/rollback por alias |
 | Evaluador futuro | Corpus congelado y API | Anotaciones e informes desde Sprint 3 |
 
 API y CLI comparten módulos de contratos, configuración, identidad y generaciones. No hay workers, colas, almacenamiento SQL ni segundo puntero mutable del índice activo.
+
+La API se ejecuta con un único proceso. `CorpusRetriever` implementa `BaseRetriever` de LlamaIndex sobre los grupos existentes y sus fragmentos ganadores; usa sus mismos IDs y no construye otro índice ni inicializa embeddings implícitos. Gemini se crea solo cuando hay contexto. El historial queda fijado a la generación del primer turno y almacena IDs del contexto recuperado y de las fuentes citadas. Los bloqueos por solicitud y conversación permiten reintentos y serialización dentro de ese proceso.
 
 ## Evidencia de publicación
 
@@ -35,6 +37,8 @@ La cobertura rechaza recibos presentes incompatibles con 503 `corpus_unavailable
 - Captura OpenAlex acotada e inmutable, con manifiesto, consultas, cuarentena y hashes; normalización y selección offline desde snapshot y CSV.
 - Selección real de 100 documentos (90 resúmenes), con piloto de 20 (18 resúmenes). Publicados 103 fragmentos en `s13_20261105_v2`. [Evidencia de búsqueda e indexación](../implementation-scrum-13.md).
 - Recuperación densa exacta agrupada por documento, con máximo score de fragmento y desempate por UUID. Filtros aplicados a catálogo y fragmentos, paginación estable para el corpus pequeño.
+- Patentes EPO OPS y selección revisada incorporadas a `s17_20261112_patents`: 106 documentos y 109 fragmentos. BM25 y fusión RRF habilitadas por manifiesto, conservando lectura de generaciones solo densas.
+- Síntesis Gemini 3.5 Flash-Lite, validación de pertenencia de citas y niveles de evidencia. Persistencia confirmada en colección Qdrant sin vectores ni alias; creación perezosa, clave estable por envío y paginación del historial.
 - Respaldo y restauración de la generación activa, incluidos pesos y procedencia, con ensayo aislado registrado en [SCRUM-14](../implementation-scrum-14.md). El código, las imágenes Docker y las generaciones históricas requieren conservación separada.
 
 ## Protocolo definido para SCRUM-26
@@ -46,9 +50,9 @@ La cobertura rechaza recibos presentes incompatibles con 503 `corpus_unavailable
 5. Cada petición fija nombres físicos; la navegación conserva `index_generation`. Una generación retirada devuelve 409.
 6. Cambios de modelo y limpieza con API detenida. Conservar activa y anterior; `rollback` restaura los dos alias y exige compatibilidad con la configuración del modelo cargado. El comando de retiro controlado sigue pendiente en SCRUM-26.
 
-`published.json` registra una publicación confirmada y el hash del manifiesto: una candidata con manifiesto no basta para autorizar navegación histórica. Los alias siguen siendo la única autoridad del índice activo. La resolución histórica exige recibo válido, manifiesto compatible y ambas colecciones presentes. Las rutas de búsqueda, detalle, disponibilidad y cobertura están implementadas. La API sigue siendo lectora; no descarga ni construye colecciones.
+`published.json` registra una publicación confirmada y el hash del manifiesto: una candidata con manifiesto no basta para autorizar navegación histórica. Los alias siguen siendo la única autoridad del índice activo. La resolución histórica exige recibo válido, manifiesto compatible y ambas colecciones presentes. La API solo lee el corpus; su única escritura es el historial separado. Publicación, reconstrucción y respaldo de corpus no incluyen `chat_turns`.
 
 ## Siguientes sprints
 
-Sprint 2: patentes, BM25 e híbrida por RRF y LlamaIndex mediante adaptador al recuperador. Sprint 3: consultas anotadas, métricas RAGAS, relevancia y revisión de respuestas. La elección de embeddings prioriza relevancia y velocidad local; E5 es provisional, BGE-M3 y EmbeddingGemma 2 son candidatos.
+Sprint 3: consultas anotadas, métricas RAGAS, relevancia, revisión de respuestas y reformulación de seguimientos. La elección de embeddings prioriza relevancia y velocidad local; E5 es provisional, BGE-M3 y EmbeddingGemma 2 son candidatos. La validación estructural de citas de S2 no sustituye esta evaluación.
 

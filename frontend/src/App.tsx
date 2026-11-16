@@ -1,5 +1,6 @@
 import { useRef, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
+import Chat from "./Chat";
 import {
   Alert,
   Button,
@@ -30,6 +31,8 @@ import type {
 } from "./api";
 
 const initial: Criteria = {
+  document_type: "all",
+  mode: "semantic",
   q: "",
   date_from: "",
   date_to: "",
@@ -54,8 +57,10 @@ const evidence: Record<string, string> = {
   ND: "No determinada",
 };
 
-const filterKeys = ["date_from", "date_to", "publication_type"] as const;
+const filterKeys = ["date_from", "date_to", "publication_type", "document_type"] as const;
 type FilterKey = (typeof filterKeys)[number];
+const filterActive = (value: Criteria | null, key: FilterKey) =>
+  !!value && (key === "document_type" ? value[key] !== "all" : !!value[key]);
 
 function Icon({ name }: { name: "search" | "arrow" | "close" | "book" }) {
   const paths = {
@@ -249,18 +254,19 @@ function Detail({
               </p>
               <ul className="provenance">
                 {document.identities.map((identity) => (
-                  <li key={`${identity.snapshot_id}-${identity.openalex_id}`}>
+                  <li key={`${identity.snapshot_id}-${identity.openalex_id ?? identity.publication_id}`}>
                     <a
-                      href={identity.openalex_id}
+                      href={identity.openalex_id ?? document.source_url}
                       target="_blank"
                       rel="noreferrer"
                     >
-                      {identity.openalex_id}
+                      {identity.openalex_id ?? `EPO OPS · ${identity.publication_id}`}
                     </a>
                     <span>
                       Capturado el {dateLabel(identity.retrieved_at)} · Lote{" "}
                       {identity.snapshot_id}
                     </span>
+                    {identity.applicants?.length ? <span>Solicitante: {identity.applicants.join(", ")}</span> : null}
                   </li>
                 ))}
               </ul>
@@ -302,6 +308,7 @@ function Detail({
 }
 
 export default function App() {
+  const [view, setView] = useState<"search" | "chat">("search");
   const compact = useMediaQuery("(max-width:700px)");
   const [draft, setDraft] = useState<Criteria>(initial);
   const [criteria, setCriteria] = useState<SearchRequest | null>(null);
@@ -330,7 +337,7 @@ export default function App() {
   const data = search.data;
   const active = corpus.data;
   const disabled =
-    ready.isPending || ready.isError || corpus.isPending || corpus.isError;
+    (draft.mode !== "lexical" && (ready.isPending || ready.isError)) || corpus.isPending || corpus.isError;
   function submit(value = draft) {
     setCriteria({
       ...value,
@@ -342,7 +349,11 @@ export default function App() {
     resultsHeading.current?.focus();
   }
   function restart() {
-    if (criteria) submit(criteria);
+    const mode = search.error instanceof ApiError && search.error.code === "search_mode_unavailable"
+      ? "semantic" : draft.mode;
+    const value = { ...draft, mode };
+    setDraft(value);
+    if (criteria) submit(value);
   }
   function changePage(page: number) {
     if (criteria && data)
@@ -356,20 +367,21 @@ export default function App() {
   const invalidDates =
     !!draft.date_from && !!draft.date_to && draft.date_from > draft.date_to;
   const pendingFilters =
-    !!criteria && filterKeys.some((key) => draft[key] !== criteria[key]);
-  const hasFilters = filterKeys.some((key) => draft[key] || criteria?.[key]);
+    !!criteria && (draft.mode !== criteria.mode || draft.document_type !== criteria.document_type || filterKeys.some((key) => draft[key] !== criteria[key]));
+  const hasFilters = filterKeys.some((key) => filterActive(draft, key) || filterActive(criteria, key));
   const appliedFilters = criteria
-    ? filterKeys.filter((key) => criteria[key])
+    ? filterKeys.filter((key) => filterActive(criteria, key))
     : [];
   function clearFilters(key?: FilterKey) {
-    const reset = key
-      ? { [key]: "" }
-      : { date_from: "", date_to: "", publication_type: "" };
+    const reset: Partial<Criteria> = key
+      ? { [key]: key === "document_type" ? "all" : "" }
+      : { date_from: "", date_to: "", publication_type: "", document_type: "all" };
     setDraft((current) => ({ ...current, ...reset }));
     if (criteria) submit({ ...criteria, ...reset });
   }
   function filterLabel(key: FilterKey) {
     if (!criteria) return "";
+    if (key === "document_type") return criteria[key] === "patent" ? "Patentes y solicitudes" : "Publicaciones científicas";
     return key === "publication_type"
       ? typeLabel(criteria[key])
       : `${key === "date_from" ? "Desde" : "Hasta"} ${dateLabel(criteria[key])}`;
@@ -395,6 +407,10 @@ export default function App() {
         </a>
       </header>
       <main>
+        <nav className="view-switch" aria-label="Vistas de la colección">
+          <Button variant={view === "search" ? "contained" : "text"} aria-pressed={view === "search"} onClick={() => setView("search")}>Buscar documentos</Button>
+          <Button variant={view === "chat" ? "contained" : "text"} aria-pressed={view === "chat"} onClick={() => setView("chat")}>Conversación</Button>
+        </nav>
         {(corpus.isError || ready.isError) && (
           <div className="notice">
             <Failure
@@ -434,6 +450,7 @@ export default function App() {
             </Alert>
           </div>
         )}
+        <div hidden={view !== "search"}>
         <form
           aria-label="Búsqueda de publicaciones"
           onSubmit={(event) => {
@@ -546,6 +563,25 @@ export default function App() {
                       La fecha inicial debe ser anterior o igual a la final.
                     </p>
                   )}
+                  <label htmlFor="document-type">
+                    Documentos
+                    <select id="document-type" value={draft.document_type}
+                      onChange={(e) => setDraft({ ...draft, document_type: e.target.value as Criteria["document_type"], publication_type: "" })}>
+                      <option value="all">Publicaciones y patentes</option>
+                      <option value="publication">Publicaciones científicas</option>
+                      <option value="patent">Patentes y solicitudes</option>
+                    </select>
+                  </label>
+                  <label htmlFor="search-mode">
+                    Modo de búsqueda
+                    <select id="search-mode" value={draft.mode}
+                      onChange={(e) => setDraft({ ...draft, mode: e.target.value as Criteria["mode"] })}>
+                      <option value="semantic">Semántica</option>
+                      <option value="lexical" disabled={!active?.manifest?.bm25}>Léxica (BM25)</option>
+                      <option value="hybrid" disabled={!active?.manifest?.bm25}>Híbrida</option>
+                    </select>
+                  </label>
+                  <p className="muted small">La búsqueda léxica compara palabras; no traduce entre español e inglés.</p>
                   <label htmlFor="publication-type">
                     Tipo
                     <select
@@ -555,8 +591,8 @@ export default function App() {
                         setDraft({ ...draft, publication_type: e.target.value })
                       }
                     >
-                      <option value="">Todas las publicaciones</option>
-                      {active?.publication_types.map((type) => (
+                      <option value="">Todos los tipos</option>
+                      {active?.publication_types.filter((type) => draft.document_type === "all" || (draft.document_type === "patent" ? type === "patent" : type !== "patent")).map((type) => (
                         <option key={type} value={type}>
                           {typeLabel(type)}
                         </option>
@@ -600,7 +636,7 @@ export default function App() {
                   <>
                     <dl className="corpus-summary">
                       <div>
-                        <dt>Publicaciones</dt>
+                          <dt>Documentos</dt>
                         <dd>{active.document_count}</dd>
                       </div>
                       <div>
@@ -615,7 +651,7 @@ export default function App() {
                     <p className="muted small">
                       Publicada el {dateLabel(active.published_at)}
                       <br />
-                      Fuente: OpenAlex · Español e inglés
+                      {active?.publication_types.includes("patent") ? "Fuentes: OpenAlex y EPO OPS" : "Fuente: OpenAlex"} · Español e inglés
                     </p>
                   </>
                 ) : (
@@ -692,8 +728,8 @@ export default function App() {
                   </span>
                   <h3>Empieza por una idea de investigación</h3>
                   <p>
-                    Puedes escribir en español o en inglés. Los resultados se
-                    ordenan por similitud semántica y cada publicación aparece
+                    Puedes escribir en español o en inglés. Los resultados
+                    se ordenan según el modo elegido y cada publicación aparece
                     una sola vez.
                   </p>
                   <p className="muted small">
@@ -735,8 +771,8 @@ export default function App() {
                   <div className="results-summary">
                     <p role="status">
                       {data.results.length > 0
-                        ? `${resultStart}–${resultEnd} de ${data.filtered_document_count} publicaciones`
-                        : "0 publicaciones"}
+                        ? `${resultStart}–${resultEnd} de ${data.matched_document_count} documentos`
+                        : "0 documentos"}
                     </p>
                     <p className="results-note">
                       Ordenadas por similitud con tu consulta; esto no garantiza
@@ -745,10 +781,11 @@ export default function App() {
                   </div>
                   {data.results.length === 0 ? (
                     <div className="welcome">
-                      <h3>No hay publicaciones para estos filtros</h3>
+                      <h3>{data.filtered_document_count === 0 ? "No hay documentos para estos filtros" : "No hay coincidencias para estos términos"}</h3>
                       <p>
-                        Amplía el intervalo de fechas o selecciona todos los
-                        tipos de publicación y vuelve a buscar.
+                        {data.filtered_document_count === 0
+                          ? "Amplía el intervalo de fechas o selecciona todos los tipos de documento y vuelve a buscar."
+                          : "Prueba otros términos o cambia al modo semántico o híbrido. La búsqueda léxica no traduce la consulta."}
                       </p>
                       {appliedFilters.length > 0 && (
                         <Button
@@ -839,7 +876,7 @@ export default function App() {
                         {Math.max(
                           1,
                           Math.ceil(
-                            data.filtered_document_count / data.page_size,
+                            data.matched_document_count / data.page_size,
                           ),
                         )}
                       </span>
@@ -858,6 +895,10 @@ export default function App() {
             </section>
           </div>
         </form>
+        </div>
+        <div hidden={view !== "chat"}>
+          <Chat active={view === "chat"} initialCriteria={criteria ?? { ...draft, mode: "hybrid" }} corpus={active} openCitation={setSelected} />
+        </div>
       </main>
       <footer>
         Nexo · Detección de caídas en el hogar
